@@ -1,0 +1,45 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/ui/debug/driving_debug_overlay.gd" id="1_overlay"]
+[ext_resource type="Script" path="res://src/ui/debug/driving_speed_graph.gd" id="2_graph"]
+
+[node name="DrivingDebugOverlay" type="CanvasLayer"]
+script = ExtResource("1_overlay")
+
+[node name="Panel" type="PanelContainer" parent="."]
+offset_left = 24.0
+offset_top = 142.0
+offset_right = 430.0
+offset_bottom = 560.0
+
+[node name="Margin" type="MarginContainer" parent="Panel"]
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 12
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Margin"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.45, 0.91, 1, 1)
+text = "DRIVING TELEMETRY  /  F3"
+
+[node name="Speed" type="Label" parent="Panel/Margin/VBox"]
+theme_override_font_sizes/font_size = 18
+text = "SPEED  0.00 m/s   0 km/h"
+
+[node name="Drift" type="Label" parent="Panel/Margin/VBox"]
+text = "SLIP  0°   NONE   MT 0 (0)   BOOST 0 ticks"
+
+[node name="Input" type="Label" parent="Panel/Margin/VBox"]
+text = "STEER 0.00   THROTTLE 0.00   BRAKE 0.00"
+
+[node name="Buttons" type="Label" parent="Panel/Margin/VBox"]
+text = "HOP --  ITEM --  LOOK --  RESPAWN --"
+
+[node name="SpeedGraph" type="Control" parent="Panel/Margin/VBox"]
+custom_minimum_size = Vector2(360, 155)
+layout_mode = 2
+script = ExtResource("2_graph")

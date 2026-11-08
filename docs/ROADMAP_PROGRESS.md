@@ -56,9 +56,11 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-094** Sector con rampas de 15°/30°/45°, curva peraltada de 25° y tres rampas marcadas para trick boost.
 - [x] **F1-095** Laboratorio de cinco superficies con modificadores medibles y dos paneles de turbo funcionales.
 - [x] **F1-096** Arena con muros a 15°/45°/90°, pilares y dummies de 75/100/130 kg.
+- [x] **F1-097–F1-099** Overlay F3 con velocidad m/s/km/h, gráfica de cinco segundos, slip/derrape/mini-turbo/boost y estado de entradas.
+- [x] **F1-100** Dibujar vector de velocidad, dirección, cinco rayos de suelo y normales de contacto en F3.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-097**, overlay de telemetría de conducción en F3.
+Siguiente trabajo de producto: revisar la física y documentar resultados del prototype gym.
