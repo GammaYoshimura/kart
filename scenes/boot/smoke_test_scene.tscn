@@ -1,0 +1,58 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/boot/smoke_test_scene.gd" id="1_script"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_ground"]
+size = Vector2(40, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(40, 0.2, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_kart"]
+size = Vector3(1.8, 0.8, 2.4)
+
+[node name="SmokeTestScene" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-55, -30, 0)
+light_energy = 1.1
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("PlaneMesh_ground")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="RotatingModel" type="Node3D" parent="."]
+position = Vector3(0, 0.8, 0)
+
+[node name="KartPlaceholder" type="MeshInstance3D" parent="RotatingModel"]
+mesh = SubResource("BoxMesh_kart")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.906308, 0.422618, 0, -0.422618, 0.906308, 0, 7, 12)
+current = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Info" type="Label" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 520.0
+offset_bottom = 128.0
+theme_override_font_sizes/font_size = 20
+text = "SMOKE TEST"
+
+[node name="RunTestsButton" type="Button" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 140.0
+offset_right = 236.0
+offset_bottom = 188.0
+text = "Lanzar tests internos"
+
+[connection signal="pressed" from="CanvasLayer/RunTestsButton" to="." method="_on_run_tests_pressed"]
