@@ -37,7 +37,9 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-015–F1-019, F1-021** Fuentes abstracta, humana y guionizada; dirección analógica con zona muerta/curva, teclado suavizado en tres ticks, gatillos y botones de acelerador/freno del mando.
 - [x] **F1-020** Buffer determinista de seis ticks para salto de derrape, consumible al tocar suelo.
 - [x] **F1-022–F1-028** Estado serializable del kart con movimiento, suelo, superficie, derrape, turbo, colisiones y copia binaria; sin dependencias de nodos.
+- [x] **F1-029** Cuerpo `CharacterBody3D` con esfera física, capas Kart_Hull y entrada de comandos por tick.
+- [ ] **F1-030** Pipeline de simulación integrado: iniciado; falta completar sensores, salto/derrape y resolución de colisiones.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
-Siguiente trabajo de producto: **F1-029**, cuerpo físico `KartSimBody`. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
+Siguiente trabajo de producto: **F1-030**, completar el pipeline de simulación del kart. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
