@@ -51,9 +51,11 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-080** Balanceo y cabeceo del chasis según dirección y boost.
 - [x] **F1-079** Suspensión visual independiente por raycast en cada rueda.
 - [x] **F1-083–F1-090** Perfil y cámara de seguimiento con giro suave, encuadre de derrape, FOV de velocidad/boost, shape cast, trauma y vista trasera.
+- [x] **F1-091–F1-092** Laboratorio `physics_gym.tscn` con recta de 300 m y arcos medidores etiquetados cada 50 m.
+- [ ] **F1-093–F1-096** Añadir sector de derrapes, rampas/peraltes, superficies/paneles de turbo y arena de colisiones.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-091**, laboratorio permanente de calibración de física. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
+Siguiente trabajo de producto: **F1-093**, sector de calibración de curvas y derrapes. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
