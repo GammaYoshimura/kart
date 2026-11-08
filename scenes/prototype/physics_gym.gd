@@ -6,8 +6,12 @@ const TRACK_HALF_WIDTH: float = 9.0
 
 @onready var _kart: KartSimBody = $Kart
 @onready var _readout: Label = $HUD/Readout
+@onready var _replay_button: Button = $HUD/ReplayButton
 var _gate_material: StandardMaterial3D
 var _drift_road_material: StandardMaterial3D
+var _recorded_commands: Array[InputCommandFrame] = []
+var _scripted_source: ScriptedInputSource
+var _replay_mode: int = 0
 
 
 func _ready() -> void:
@@ -24,12 +28,58 @@ func _ready() -> void:
 	_build_ramp_sector()
 	_build_surface_sector()
 	_build_collision_sector()
+	var replay_connection_error: int = _replay_button.pressed.connect(_on_replay_button_pressed)
+	if replay_connection_error != OK:
+		push_error("PhysicsGym could not connect its replay button.")
+
+
+func _physics_process(_delta: float) -> void:
+	if _replay_mode == 1:
+		var command: InputCommandFrame = _kart.last_command_frame
+		_recorded_commands.append(InputCommandFrame.new(
+			command.tick, command.steer_axis, command.throttle_axis, command.brake_axis, command.buttons_bitmask
+		))
+	elif _replay_mode == 2 and _scripted_source != null and _scripted_source._next_frame_index >= _scripted_source.frames.size():
+		_replay_mode = 0
+		_kart.input_source = LocalHumanInputSource.new()
+		_replay_button.text = "Grabar / reproducir inputs"
+		_readout.text += "   REPLAY COMPLETE"
 
 
 func _process(_delta: float) -> void:
 	var distance_m: int = roundi(145.0 - _kart.global_position.z)
 	var speed_kmh: int = roundi(absf(_kart.state.forward_speed) * 3.6)
 	_readout.text = "RECTA 300 m   %03d / 300 m     %03d km/h" % [clampi(distance_m, 0, STRAIGHT_LENGTH_METERS), speed_kmh]
+	if _replay_mode == 1:
+		_readout.text += "   REC %d ticks" % _recorded_commands.size()
+	elif _replay_mode == 2:
+		_readout.text += "   REPLAY"
+
+
+func _on_replay_button_pressed() -> void:
+	if _replay_mode == 0:
+		_recorded_commands.clear()
+		_replay_mode = 1
+		_kart.input_source = LocalHumanInputSource.new()
+		_replay_button.text = "Detener y reproducir"
+	elif _replay_mode == 1:
+		if _recorded_commands.is_empty():
+			return
+		_scripted_source = ScriptedInputSource.new()
+		_scripted_source.frames = _recorded_commands.duplicate(true)
+		_replay_mode = 2
+		_kart.global_position = Vector3(0.0, 0.72, 145.0)
+		_kart.velocity = Vector3.ZERO
+		_kart.state = KartSimState.new()
+		_kart.state.position = _kart.global_position
+		_kart.state.heading_yaw = 0.0
+		_kart.simulation_tick = 0
+		_kart.input_source = _scripted_source
+		_replay_button.text = "Parar replay"
+	else:
+		_replay_mode = 0
+		_kart.input_source = LocalHumanInputSource.new()
+		_replay_button.text = "Grabar / reproducir inputs"
 
 
 func _build_distance_gates() -> void:
