@@ -32,6 +32,7 @@ var kart_bump_cooldown: int = 0
 var last_wall_normal: Vector3 = Vector3.ZERO
 var drift_hop_buffer_tick: int = -1
 var last_drift_hop_pressed: bool = false
+var trick_hop_input_tick: int = -1
 
 
 func update_drift_hop_buffer(command: InputCommandFrame) -> void:
@@ -85,6 +86,7 @@ func write_to_buffer(buf: StreamPeerBuffer) -> void:
 	_write_vector3(buf, last_wall_normal)
 	buf.put_32(drift_hop_buffer_tick)
 	buf.put_u8(1 if last_drift_hop_pressed else 0)
+	buf.put_32(trick_hop_input_tick)
 
 
 func read_from_buffer(buf: StreamPeerBuffer) -> void:
@@ -118,6 +120,7 @@ func read_from_buffer(buf: StreamPeerBuffer) -> void:
 	last_wall_normal = _read_vector3(buf)
 	drift_hop_buffer_tick = buf.get_32()
 	last_drift_hop_pressed = buf.get_u8() != 0
+	trick_hop_input_tick = buf.get_32()
 
 
 func copy_from(other: KartSimState) -> void:
@@ -150,6 +153,7 @@ func copy_from(other: KartSimState) -> void:
 	last_wall_normal = other.last_wall_normal
 	drift_hop_buffer_tick = other.drift_hop_buffer_tick
 	last_drift_hop_pressed = other.last_drift_hop_pressed
+	trick_hop_input_tick = other.trick_hop_input_tick
 
 
 func _write_vector3(buf: StreamPeerBuffer, value: Vector3) -> void:

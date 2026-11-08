@@ -45,8 +45,12 @@ func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 	if stats == null or delta <= 0.0:
 		return
 	state.just_landed_this_tick = false
+	var drift_hop_pressed: bool = command.is_button_pressed(InputCommandFrame.BIT_DRIFT_HOP)
+	if drift_hop_pressed and not state.last_drift_hop_pressed:
+		state.trick_hop_input_tick = command.tick
 	state.update_drift_hop_buffer(command)
 	_update_ground_and_surface_sensors(delta)
+	_update_trick_ramp_boost(command.tick)
 	_update_status_and_boost_timers()
 	_update_hop_and_drift_state(command)
 	_update_steering_and_heading(command, delta)
@@ -94,6 +98,15 @@ func _update_status_and_boost_timers() -> void:
 		state.wall_contact_cooldown -= 1
 	if state.kart_bump_cooldown > 0:
 		state.kart_bump_cooldown -= 1
+
+
+func _update_trick_ramp_boost(current_tick: int) -> void:
+	if state.trick_hop_input_tick < 0 or current_tick - state.trick_hop_input_tick > 12:
+		return
+	for raycast: RayCast3D in _ground_raycasts:
+		if raycast.is_colliding() and bool(raycast.get_collider().get_meta("is_trick_ramp", false)):
+			state.trick_boost_armed = true
+			return
 
 
 func _update_hop_and_drift_state(command: InputCommandFrame) -> void:
@@ -248,6 +261,9 @@ func _move_and_resolve_collisions() -> void:
 			state.landing_impact_speed = impact_speed
 			velocity = velocity.slide(state.ground_normal)
 			EventBus.kart_landed.emit(racer_id, state.landing_impact_speed)
+			if state.trick_boost_armed:
+				apply_boost(45, stats.mt_1_speed_bonus)
+				state.trick_boost_armed = false
 	else:
 		state.airborne_ticks += 1
 	state.vertical_speed = velocity.dot(Vector3.UP)
