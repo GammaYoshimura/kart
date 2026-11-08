@@ -3,13 +3,17 @@ extends Node3D
 
 var simulation_clock: SimulationClock = SimulationClock.new()
 var states_by_slot: Dictionary = {}
+var kart_stats_by_slot: Dictionary = {}
 var last_inputs_by_slot: Dictionary = {}
 
-func register_state(slot: int, state: SerializableState) -> void:
+func register_state(slot: int, state: SerializableState, kart_stats: KartStatsResource = null) -> void:
 	states_by_slot[slot] = state
+	if kart_stats != null:
+		kart_stats_by_slot[slot] = kart_stats
 
 func unregister_slot(slot: int) -> void:
 	states_by_slot.erase(slot)
+	kart_stats_by_slot.erase(slot)
 	last_inputs_by_slot.erase(slot)
 
 func step_tick(inputs_by_slot: Dictionary) -> void:
@@ -19,6 +23,7 @@ func step_tick(inputs_by_slot: Dictionary) -> void:
 		var command: Variant = inputs_by_slot[slot_variant]
 		if command is InputCommandFrame:
 			command.tick = simulation_clock.current_tick
+	KartCollisionResolver.resolve_all(states_by_slot, kart_stats_by_slot)
 
 func capture_world_snapshot() -> WorldSimSnapshot:
 	return WorldSimSnapshot.new(
