@@ -21,6 +21,7 @@ func _ready() -> void:
 	_drift_road_material.roughness = 0.88
 	_build_distance_gates()
 	_build_drift_sector()
+	_build_ramp_sector()
 
 
 func _process(_delta: float) -> void:
@@ -106,3 +107,45 @@ func _add_sector_label(text_value: String, label_position: Vector3) -> void:
 	label.font_size = 48
 	label.modulate = Color(1.0, 0.72, 0.2)
 	add_child(label)
+
+
+func _build_ramp_sector() -> void:
+	_add_ramp(Vector3(178.0, 0.25, 105.0), 15.0, false, "Ramp_15")
+	_add_ramp(Vector3(192.0, 0.25, 68.0), 30.0, false, "Ramp_30")
+	_add_ramp(Vector3(206.0, 0.25, 30.0), 45.0, false, "Ramp_45")
+	_add_ramp(Vector3(222.0, 0.25, -12.0), 18.0, true, "TrickRamp_01")
+	_add_ramp(Vector3(238.0, 0.25, -48.0), 30.0, true, "TrickRamp_02")
+	_add_ramp(Vector3(254.0, 0.25, -84.0), 42.0, true, "TrickRamp_03")
+	var bank: StaticBody3D = StaticBody3D.new()
+	bank.name = "BankedCurve_25"
+	bank.position = Vector3(180.0, 0.8, -40.0)
+	bank.rotation.z = deg_to_rad(25.0)
+	bank.collision_layer = 1
+	_add_box_surface(bank, Vector3(12.0, 0.45, 24.0))
+	add_child(bank)
+	_add_sector_label("RAMPS 15° / 30° / 45°   •   BANK 25°   •   TRICK BOOST", Vector3(210.0, 7.0, -115.0))
+
+
+func _add_ramp(ramp_position: Vector3, slope_degrees: float, is_trick_ramp: bool, ramp_name: String) -> void:
+	var ramp: StaticBody3D = StaticBody3D.new()
+	ramp.name = ramp_name
+	ramp.position = ramp_position
+	ramp.rotation.x = deg_to_rad(slope_degrees)
+	ramp.collision_layer = 1
+	ramp.set_meta("is_trick_ramp", is_trick_ramp)
+	_add_box_surface(ramp, Vector3(8.0, 0.5, 14.0))
+	add_child(ramp)
+
+
+func _add_box_surface(parent: StaticBody3D, box_size: Vector3) -> void:
+	var mesh: BoxMesh = BoxMesh.new()
+	mesh.size = box_size
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.mesh = mesh
+	mesh_instance.material_override = _gate_material
+	parent.add_child(mesh_instance)
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = box_size
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	parent.add_child(collision)
