@@ -74,11 +74,25 @@ func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 func _update_ground_and_surface_sensors(delta: float) -> void:
 	var normal_sum: Vector3 = Vector3.ZERO
 	var hit_count: int = 0
+	var surface_read: bool = false
+	surface_speed_mult = 1.0
+	surface_acceleration_mult = 1.0
+	surface_grip_mult = 1.0
+	surface_cancels_drift_without_boost = false
+	state.current_surface_id = 0
 	for raycast: RayCast3D in _ground_raycasts:
 		raycast.force_raycast_update()
 		if raycast.is_colliding():
 			normal_sum += raycast.get_collision_normal()
 			hit_count += 1
+			if not surface_read:
+				var surface: Object = raycast.get_collider()
+				surface_speed_mult = float(surface.get_meta("surface_speed_mult", 1.0))
+				surface_acceleration_mult = float(surface.get_meta("surface_acceleration_mult", 1.0))
+				surface_grip_mult = float(surface.get_meta("surface_grip_mult", 1.0))
+				surface_cancels_drift_without_boost = bool(surface.get_meta("cancels_drift_without_boost", false))
+				state.current_surface_id = int(surface.get_meta("surface_id", 0))
+				surface_read = true
 	var ascending_hop: bool = state.drift_state == 1 and state.vertical_speed > 0.0
 	var has_walkable_ground: bool = hit_count > 0
 	if has_walkable_ground:
@@ -90,7 +104,6 @@ func _update_ground_and_surface_sensors(delta: float) -> void:
 		state.up_normal = state.up_normal.slerp(state.ground_normal, minf(GROUND_ALIGN_SPEED * delta, 1.0)).normalized()
 		if state.vertical_speed < 0.0:
 			state.vertical_speed = 0.0
-	state.current_surface_id = 0
 
 
 func _update_status_and_boost_timers() -> void:

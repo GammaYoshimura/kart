@@ -54,10 +54,11 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-091–F1-092** Laboratorio `physics_gym.tscn` con recta de 300 m y arcos medidores etiquetados cada 50 m.
 - [x] **F1-093** Sector de derrape con S, giro de 90°, arco manual de 180° de radio 30 m y horquilla de radio 12 m.
 - [x] **F1-094** Sector con rampas de 15°/30°/45°, curva peraltada de 25° y tres rampas marcadas para trick boost.
-- [ ] **F1-095–F1-096** Añadir franjas de superficies/paneles de turbo y arena de colisiones.
+- [x] **F1-095** Laboratorio de cinco superficies con modificadores medibles y dos paneles de turbo funcionales.
+- [ ] **F1-096** Añadir arena de colisiones con muros angulados, pilares y karts dummy.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-095**, laboratorio de superficies y paneles de turbo. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
+Siguiente trabajo de producto: **F1-096**, arena de colisiones. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.

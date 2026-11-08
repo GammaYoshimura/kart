@@ -22,6 +22,7 @@ func _ready() -> void:
 	_build_distance_gates()
 	_build_drift_sector()
 	_build_ramp_sector()
+	_build_surface_sector()
 
 
 func _process(_delta: float) -> void:
@@ -149,3 +150,65 @@ func _add_box_surface(parent: StaticBody3D, box_size: Vector3) -> void:
 	var collision: CollisionShape3D = CollisionShape3D.new()
 	collision.shape = shape
 	parent.add_child(collision)
+
+
+func _build_surface_sector() -> void:
+	var surfaces: Array[Dictionary] = [
+		{"name": "Asphalt", "id": 1, "x": -28.0, "speed": 1.0, "accel": 1.0, "grip": 1.0, "color": Color(0.18, 0.22, 0.27)},
+		{"name": "Dirt", "id": 2, "x": -42.0, "speed": 0.85, "accel": 0.78, "grip": 0.82, "color": Color(0.42, 0.25, 0.12)},
+		{"name": "Sand", "id": 3, "x": -56.0, "speed": 0.68, "accel": 0.62, "grip": 0.7, "color": Color(0.82, 0.65, 0.3)},
+		{"name": "Grass", "id": 4, "x": -70.0, "speed": 0.55, "accel": 0.52, "grip": 0.55, "color": Color(0.16, 0.48, 0.2)},
+		{"name": "Ice", "id": 5, "x": -84.0, "speed": 0.9, "accel": 0.9, "grip": 0.22, "color": Color(0.35, 0.78, 0.95)},
+	]
+	for surface: Dictionary in surfaces:
+		var body: StaticBody3D = StaticBody3D.new()
+		body.name = "Surface_%s" % str(surface["name"])
+		body.position = Vector3(float(surface["x"]), -0.15, 50.0)
+		body.collision_layer = 1
+		body.set_meta("surface_id", int(surface["id"]))
+		body.set_meta("surface_speed_mult", float(surface["speed"]))
+		body.set_meta("surface_acceleration_mult", float(surface["accel"]))
+		body.set_meta("surface_grip_mult", float(surface["grip"]))
+		body.set_meta("cancels_drift_without_boost", str(surface["name"]) == "Grass")
+		var material: StandardMaterial3D = StandardMaterial3D.new()
+		material.albedo_color = Color(surface["color"])
+		material.roughness = 0.88
+		var size: Vector3 = Vector3(12.0, 0.3, 120.0)
+		var mesh: BoxMesh = BoxMesh.new()
+		mesh.size = size
+		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+		mesh_instance.mesh = mesh
+		mesh_instance.material_override = material
+		body.add_child(mesh_instance)
+		var shape: BoxShape3D = BoxShape3D.new()
+		shape.size = size
+		var collision: CollisionShape3D = CollisionShape3D.new()
+		collision.shape = shape
+		body.add_child(collision)
+		add_child(body)
+	_add_sector_label("SURFACES: ASPHALT / DIRT / SAND / GRASS / ICE", Vector3(-56.0, 5.0, -18.0))
+	_add_boost_pad(Vector3(-56.0, 0.0, -92.0))
+	_add_boost_pad(Vector3(-56.0, 0.0, -104.0))
+
+
+func _add_boost_pad(pad_position: Vector3) -> void:
+	var pad: Area3D = Area3D.new()
+	pad.name = "BoostPad"
+	pad.position = pad_position
+	pad.set_script(load("res://src/simulation/track/boost_pad_zone.gd"))
+	var pad_mesh: BoxMesh = BoxMesh.new()
+	pad_mesh.size = Vector3(7.0, 0.12, 2.4)
+	var pad_material: StandardMaterial3D = StandardMaterial3D.new()
+	pad_material.albedo_color = Color(0.1, 1.0, 0.45, 1.0)
+	pad_material.emission_enabled = true
+	pad_material.emission = Color(0.04, 0.8, 0.22, 1.0)
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.mesh = pad_mesh
+	mesh_instance.material_override = pad_material
+	pad.add_child(mesh_instance)
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = Vector3(7.0, 0.4, 2.4)
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	pad.add_child(collision)
+	add_child(pad)
