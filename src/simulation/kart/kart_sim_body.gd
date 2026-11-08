@@ -2,6 +2,9 @@ class_name KartSimBody
 extends CharacterBody3D
 
 @export var stats: KartStatsResource
+@export_range(0.1, 2.0, 0.05) var surface_speed_mult: float = 1.0
+@export_range(0.1, 2.0, 0.05) var surface_acceleration_mult: float = 1.0
+@export_range(0.1, 2.0, 0.05) var surface_grip_mult: float = 1.0
 
 var state: KartSimState = KartSimState.new()
 var input_source: KartInputSource
@@ -130,10 +133,12 @@ func _update_steering_and_heading(command: InputCommandFrame, delta: float) -> v
 func _update_longitudinal_velocity(command: InputCommandFrame, delta: float) -> void:
 	var throttle: float = command.get_throttle_float()
 	var brake: float = command.get_brake_float()
-	var effective_max_speed: float = stats.max_speed_forward + state.boost_speed_bonus
+	var active_boost_speed_bonus: float = state.boost_speed_bonus if state.boost_ticks_left > 0 else 0.0
+	var effective_surface_mult: float = maxf(surface_speed_mult, 1.0) if active_boost_speed_bonus > 0.0 else surface_speed_mult
+	var effective_max_speed: float = stats.max_speed_forward * effective_surface_mult + active_boost_speed_bonus
 	if throttle > 0.0:
 		var speed_ratio: float = clampf(state.forward_speed / effective_max_speed, 0.0, 1.0)
-		var acceleration: float = stats.base_acceleration * stats.acceleration_curve.sample_baked(speed_ratio)
+		var acceleration: float = stats.base_acceleration * stats.acceleration_curve.sample_baked(speed_ratio) * surface_acceleration_mult
 		state.forward_speed = minf(state.forward_speed + acceleration * throttle * delta, effective_max_speed)
 	elif brake > 0.0 and state.forward_speed > 0.2:
 		state.forward_speed = move_toward(state.forward_speed, 0.0, stats.braking_deceleration * brake * delta)
@@ -149,7 +154,9 @@ func _update_longitudinal_velocity(command: InputCommandFrame, delta: float) -> 
 
 func _update_lateral_velocity(delta: float) -> void:
 	var lateral_speed: float = velocity.dot(state.right_dir)
-	var grip: float = stats.lateral_grip_grounded if state.is_grounded else stats.lateral_grip_airborne
+	var grip: float = stats.lateral_grip_airborne
+	if state.is_grounded:
+		grip = stats.lateral_grip_drifting if state.drift_state == 2 else stats.lateral_grip_grounded * surface_grip_mult
 	lateral_speed = move_toward(lateral_speed, 0.0, grip * delta)
 	state.lateral_speed = lateral_speed
 
@@ -180,6 +187,9 @@ func _move_and_resolve_collisions() -> void:
 	else:
 		state.airborne_ticks += 1
 	state.vertical_speed = velocity.dot(Vector3.UP)
+	var horizontal_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
+	state.forward_speed = horizontal_velocity.dot(state.forward_dir)
+	state.lateral_speed = horizontal_velocity.dot(state.right_dir)
 
 
 func _ensure_collision_shape() -> void:
