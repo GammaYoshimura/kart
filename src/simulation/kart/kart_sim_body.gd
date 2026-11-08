@@ -11,6 +11,7 @@ const GROUND_ALIGN_SPEED: float = 10.0
 @export var surface_cancels_drift_without_boost: bool = false
 
 var state: KartSimState = KartSimState.new()
+var last_command_frame: InputCommandFrame = InputCommandFrame.new()
 var input_source: KartInputSource
 var simulation_tick: int = 0
 var _ground_raycasts: Array[RayCast3D] = []
@@ -44,6 +45,9 @@ func _physics_process(delta: float) -> void:
 func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 	if stats == null or delta <= 0.0:
 		return
+	last_command_frame = InputCommandFrame.new(
+		command.tick, command.steer_axis, command.throttle_axis, command.brake_axis, command.buttons_bitmask
+	)
 	state.just_landed_this_tick = false
 	var drift_hop_pressed: bool = command.is_button_pressed(InputCommandFrame.BIT_DRIFT_HOP)
 	if drift_hop_pressed and not state.last_drift_hop_pressed:
