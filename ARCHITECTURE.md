@@ -20,3 +20,17 @@ La simulación avanza a 60 Hz mediante `SimulationClock` y `SimulationWorld.step
 ## Autoridad de red
 
 En multijugador, el servidor dedicado valida entradas, avanza la simulación autoritativa y distribuye snapshots. El cliente predice su propio kart y reconcilia el estado con snapshots del servidor. El protocolo y los esquemas de pista y guardado llevan versiones independientes en `VersionInfo`.
+
+## Tick de conducción del kart
+
+`KartSimBody.simulate_tick(command, delta)` procesa cada tick en este orden:
+
+1. Actualiza el frame de entrada y el buffer de hop.
+2. Consulta cinco sensores de suelo y aplica los metadatos de la superficie detectada.
+3. Actualiza turbo, tiempos de contacto, hop, derrape y carga de mini-turbo.
+4. Suaviza la dirección, ajusta el giro por velocidad y calcula rumbo.
+5. Aplica aceleración, freno/reversa y agarre lateral según suelo/derrape/aire.
+6. Aplica gravedad y conserva la velocidad tangencial al avanzar por pendientes.
+7. Mueve el cuerpo físico, resuelve contactos, actualiza `KartSimState` y emite eventos de aterrizaje/choque.
+
+`KartSimState` contiene el estado serializable, sin referencias a nodos de escena. `KartCollisionResolver` resuelve pares de estados ordenados por slot. `KartVisualNode` interpola transforms y anima suspensión/ruedas/chasis; `KartCamera3D` consume el estado y eventos sin escribir en la simulación.

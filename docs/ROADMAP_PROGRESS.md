@@ -59,7 +59,8 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-097–F1-099** Overlay F3 con velocidad m/s/km/h, gráfica de cinco segundos, slip/derrape/mini-turbo/boost y estado de entradas.
 - [x] **F1-100** Dibujar vector de velocidad, dirección, cinco rayos de suelo y normales de contacto en F3.
 - [x] **F1-101** Panel F3 de hot tuning para tres presets, sliders en vivo y guardado local `.tres`.
-- [ ] **F1-102–F1-107, F1-109–F1-110** Replay A/B, pruebas unitarias/1000 ticks, export y docs pendientes.
+- [ ] **F1-102–F1-107, F1-110** Replay A/B, pruebas unitarias/1000 ticks, export y tag pendientes.
+- [x] **F1-109** Pipeline de siete fases de `KartSimBody.simulate_tick()` documentado en `ARCHITECTURE.md`.
 - [ ] **F1-108** Aplazado hasta Fase 11 por instrucción del usuario.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
