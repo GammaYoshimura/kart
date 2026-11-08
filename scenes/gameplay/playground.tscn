@@ -1,0 +1,201 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Script" path="res://scenes/gameplay/playground.gd" id="1_game"]
+[ext_resource type="Script" path="res://src/simulation/kart/kart_sim_body.gd" id="2_kart"]
+[ext_resource type="Resource" path="res://resources/karts/stats_balanced.tres" id="3_stats"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_Track"]
+albedo_color = Color(0.095, 0.12, 0.15, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="Mat_Kart"]
+albedo_color = Color(0.06, 0.78, 0.95, 1)
+metallic = 0.18
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="Mat_Accent"]
+albedo_color = Color(1, 0.38, 0.12, 1)
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_Tire"]
+albedo_color = Color(0.025, 0.03, 0.04, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_Wall"]
+albedo_color = Color(0.98, 0.32, 0.12, 1)
+roughness = 0.55
+
+[sub_resource type="Environment" id="Environment_Play"]
+background_mode = 1
+background_color = Color(0.035, 0.055, 0.085, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.52, 0.64, 0.82, 1)
+ambient_light_energy = 0.6
+
+[sub_resource type="BoxShape3D" id="Shape_Ground"]
+size = Vector3(30, 0.3, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_Ground"]
+size = Vector3(30, 0.3, 30)
+
+[sub_resource type="BoxShape3D" id="Shape_Wall"]
+size = Vector3(30, 1.2, 0.5)
+
+[sub_resource type="BoxMesh" id="Mesh_Chassis"]
+size = Vector3(1.45, 0.48, 2.1)
+
+[sub_resource type="BoxMesh" id="Mesh_Nose"]
+size = Vector3(1.0, 0.24, 0.7)
+
+[sub_resource type="BoxMesh" id="Mesh_Seat"]
+size = Vector3(0.72, 0.55, 0.72)
+
+[sub_resource type="BoxMesh" id="Mesh_Wheel"]
+size = Vector3(0.32, 0.42, 0.55)
+
+[sub_resource type="BoxMesh" id="Mesh_Wall"]
+size = Vector3(30, 1.2, 0.5)
+
+[node name="Playground" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_Play")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-52, -28, 0)
+light_energy = 1.25
+shadow_enabled = true
+
+[node name="Track" type="StaticBody3D" parent="."]
+position = Vector3(0, -0.15, 0)
+collision_layer = 1
+
+[node name="GroundMesh" type="MeshInstance3D" parent="Track"]
+mesh = SubResource("Mesh_Ground")
+surface_material_override/0 = SubResource("Mat_Track")
+
+[node name="GroundCollision" type="CollisionShape3D" parent="Track"]
+shape = SubResource("Shape_Ground")
+
+[node name="Kart" type="CharacterBody3D" parent="."]
+position = Vector3(0, 0.72, 0)
+script = ExtResource("2_kart")
+stats = ExtResource("3_stats")
+
+[node name="Chassis" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0, -0.08, 0)
+mesh = SubResource("Mesh_Chassis")
+surface_material_override/0 = SubResource("Mat_Kart")
+
+[node name="Nose" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0, -0.03, -1.05)
+mesh = SubResource("Mesh_Nose")
+surface_material_override/0 = SubResource("Mat_Accent")
+
+[node name="Seat" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0, 0.3, 0.2)
+mesh = SubResource("Mesh_Seat")
+surface_material_override/0 = SubResource("Mat_Accent")
+
+[node name="WheelFL" type="MeshInstance3D" parent="Kart"]
+position = Vector3(-0.78, -0.2, -0.66)
+mesh = SubResource("Mesh_Wheel")
+surface_material_override/0 = SubResource("Mat_Tire")
+
+[node name="WheelFR" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0.78, -0.2, -0.66)
+mesh = SubResource("Mesh_Wheel")
+surface_material_override/0 = SubResource("Mat_Tire")
+
+[node name="WheelRL" type="MeshInstance3D" parent="Kart"]
+position = Vector3(-0.78, -0.2, 0.68)
+mesh = SubResource("Mesh_Wheel")
+surface_material_override/0 = SubResource("Mat_Tire")
+
+[node name="WheelRR" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0.78, -0.2, 0.68)
+mesh = SubResource("Mesh_Wheel")
+surface_material_override/0 = SubResource("Mat_Tire")
+
+[node name="Camera3D" type="Camera3D" parent="Kart"]
+position = Vector3(0, 4.6, 8.5)
+rotation_degrees = Vector3(-25, 0, 0)
+current = true
+fov = 72.0
+
+[node name="BoundaryNorth" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.6, -14.75)
+collision_layer = 2
+
+[node name="Mesh" type="MeshInstance3D" parent="BoundaryNorth"]
+mesh = SubResource("Mesh_Wall")
+surface_material_override/0 = SubResource("Mat_Wall")
+
+[node name="Collision" type="CollisionShape3D" parent="BoundaryNorth"]
+shape = SubResource("Shape_Wall")
+
+[node name="BoundarySouth" type="StaticBody3D" parent="."]
+position = Vector3(0, 0.6, 14.75)
+collision_layer = 2
+
+[node name="Mesh" type="MeshInstance3D" parent="BoundarySouth"]
+mesh = SubResource("Mesh_Wall")
+surface_material_override/0 = SubResource("Mat_Wall")
+
+[node name="Collision" type="CollisionShape3D" parent="BoundarySouth"]
+shape = SubResource("Shape_Wall")
+
+[node name="BoundaryEast" type="StaticBody3D" parent="."]
+position = Vector3(14.75, 0.6, 0)
+rotation_degrees = Vector3(0, 90, 0)
+collision_layer = 2
+
+[node name="Mesh" type="MeshInstance3D" parent="BoundaryEast"]
+mesh = SubResource("Mesh_Wall")
+surface_material_override/0 = SubResource("Mat_Wall")
+
+[node name="Collision" type="CollisionShape3D" parent="BoundaryEast"]
+shape = SubResource("Shape_Wall")
+
+[node name="BoundaryWest" type="StaticBody3D" parent="."]
+position = Vector3(-14.75, 0.6, 0)
+rotation_degrees = Vector3(0, 90, 0)
+collision_layer = 2
+
+[node name="Mesh" type="MeshInstance3D" parent="BoundaryWest"]
+mesh = SubResource("Mesh_Wall")
+surface_material_override/0 = SubResource("Mat_Wall")
+
+[node name="Collision" type="CollisionShape3D" parent="BoundaryWest"]
+shape = SubResource("Shape_Wall")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Title" type="Label" parent="HUD"]
+offset_left = 28.0
+offset_top = 24.0
+offset_right = 850.0
+offset_bottom = 74.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(0.55, 0.93, 1, 1)
+text = "KART ARCADE  /  PISTA DE PRUEBAS"
+
+[node name="Speed" type="Label" parent="HUD"]
+offset_left = 30.0
+offset_top = 88.0
+offset_right = 390.0
+offset_bottom = 132.0
+theme_override_font_sizes/font_size = 24
+text = "VELOCIDAD  000 km/h"
+
+[node name="Controls" type="Label" parent="HUD"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = -58.0
+offset_right = 970.0
+offset_bottom = -18.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.82, 0.86, 0.9, 1)
+text = "WASD / FLECHAS: conducir     ESPACIO: salto/derrape     F5: métricas"
