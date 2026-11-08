@@ -34,6 +34,7 @@ extends Resource
 @export_group("Collision and gravity")
 @export var collision_sphere_radius: float = 0.65
 @export var weight_mass: float = 100.0
+@export var wall_bounce_impulse: float = 4.0
 @export var gravity_grounded: float = 20.0
 @export var gravity_airborne: float = 34.0
 @export var max_fall_speed: float = 55.0

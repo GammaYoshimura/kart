@@ -8,6 +8,7 @@ const GROUND_ALIGN_SPEED: float = 10.0
 @export_range(0.1, 2.0, 0.05) var surface_speed_mult: float = 1.0
 @export_range(0.1, 2.0, 0.05) var surface_acceleration_mult: float = 1.0
 @export_range(0.1, 2.0, 0.05) var surface_grip_mult: float = 1.0
+@export var surface_cancels_drift_without_boost: bool = false
 
 var state: KartSimState = KartSimState.new()
 var input_source: KartInputSource
@@ -98,7 +99,10 @@ func _update_status_and_boost_timers() -> void:
 func _update_hop_and_drift_state(command: InputCommandFrame) -> void:
 	var drift_pressed: bool = command.is_button_pressed(InputCommandFrame.BIT_DRIFT_HOP)
 	var minimum_drift_speed: float = stats.max_speed_forward * stats.min_drift_entry_speed_ratio
-	if state.drift_state != 0 and command.brake_axis > 0 and state.forward_speed <= minimum_drift_speed:
+	if state.drift_state != 0 and (
+		(command.brake_axis > 0 and state.forward_speed <= minimum_drift_speed)
+		or surface_cancels_drift_without_boost
+	):
 		_cancel_drift()
 	if state.drift_state == 0 and state.consume_drift_hop_buffer(command.tick, state.is_grounded):
 		state.drift_state = 1
@@ -231,7 +235,7 @@ func _move_and_resolve_collisions() -> void:
 	var impact_speed: float = absf(state.vertical_speed)
 	var collided: bool = move_and_slide()
 	if collided and is_on_wall():
-		state.last_wall_normal = get_wall_normal()
+		_handle_wall_collision()
 	state.position = global_position
 	state.linear_velocity = velocity
 	state.is_grounded = is_on_floor()
@@ -250,6 +254,33 @@ func _move_and_resolve_collisions() -> void:
 	var horizontal_velocity: Vector3 = Vector3(velocity.x, 0.0, velocity.z)
 	state.forward_speed = horizontal_velocity.dot(state.forward_dir)
 	state.lateral_speed = horizontal_velocity.dot(state.right_dir)
+
+
+func _handle_wall_collision() -> void:
+	var wall_normal: Vector3 = Vector3.ZERO
+	var contact_point: Vector3 = global_position
+	for collision_index: int in range(get_slide_collision_count()):
+		var collision: KinematicCollision3D = get_slide_collision(collision_index)
+		var collider: CollisionObject3D = collision.get_collider() as CollisionObject3D
+		if collider != null and (collider.collision_layer & (1 << 1)) != 0:
+			wall_normal = collision.get_normal()
+			contact_point = collision.get_position()
+			break
+	wall_normal.y = 0.0
+	wall_normal = wall_normal.normalized()
+	if wall_normal.is_zero_approx():
+		return
+	state.last_wall_normal = wall_normal
+	var impact_dot: float = absf(state.forward_dir.dot(wall_normal))
+	if impact_dot < 0.45:
+		velocity = velocity.slide(wall_normal) * 0.96
+		return
+	_cancel_drift()
+	velocity = velocity.slide(wall_normal) * 0.65 + wall_normal * stats.wall_bounce_impulse
+	state.forward_speed *= 1.0 - impact_dot * 0.35
+	if state.wall_contact_cooldown == 0:
+		EventBus.kart_wall_collision.emit(racer_id, impact_dot, contact_point)
+		state.wall_contact_cooldown = 12
 
 
 func _ensure_collision_shape() -> void:
