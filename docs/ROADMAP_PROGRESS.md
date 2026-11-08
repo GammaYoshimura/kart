@@ -48,10 +48,10 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-065** Salto con truco en superficies marcadas `is_trick_ramp`, con boost al aterrizar.
 - [x] **F1-066, F1-070–F1-073** Colisiones de kart con pista mediante barrido físico y resolutor determinista entre karts, con transferencia de momento por masa, bonus de embestida y separación horizontal.
 - [x] **F1-074–F1-078, F1-080** Presentación separada que interpola el estado, anima ruedas y dirección, y aplica inclinación/derrape al chasis sin modificar la simulación.
-- [ ] **F1-079** Suspensión visual independiente por raycast en cada rueda.
+- [x] **F1-079** Suspensión visual independiente por raycast en cada rueda.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-079**, suspensión visual por rueda. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
+Siguiente trabajo de producto: revisar y pulir la conducción sobre pista. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.

@@ -10,6 +10,9 @@ var _front_left_wheel: Node3D
 var _front_right_wheel: Node3D
 var _rear_left_wheel: Node3D
 var _rear_right_wheel: Node3D
+var _wheel_raycasts: Array[RayCast3D] = []
+var _wheel_nodes: Array[Node3D] = []
+var _wheel_rest_heights: Array[float] = []
 var _previous_transform: Transform3D
 var _current_transform: Transform3D
 var _wheel_rotation: float = 0.0
@@ -22,6 +25,14 @@ func _ready() -> void:
 	_front_right_wheel = get_node_or_null("ChassisPivot/WheelFR") as Node3D
 	_rear_left_wheel = get_node_or_null("ChassisPivot/WheelRL") as Node3D
 	_rear_right_wheel = get_node_or_null("ChassisPivot/WheelRR") as Node3D
+	_wheel_nodes = [_front_left_wheel, _front_right_wheel, _rear_left_wheel, _rear_right_wheel]
+	_wheel_rest_heights = [-0.4, -0.4, -0.4, -0.4]
+	_wheel_raycasts = [
+		get_node_or_null("ChassisPivot/WheelRayFL") as RayCast3D,
+		get_node_or_null("ChassisPivot/WheelRayFR") as RayCast3D,
+		get_node_or_null("ChassisPivot/WheelRayRL") as RayCast3D,
+		get_node_or_null("ChassisPivot/WheelRayRR") as RayCast3D,
+	]
 	if _sim_body == null or _chassis_pivot == null:
 		push_error("KartVisualNode requires a KartSimBody and ChassisPivot.")
 		set_process(false)
@@ -45,6 +56,7 @@ func _process(_delta: float) -> void:
 	)
 	_apply_chassis_motion()
 	_apply_wheel_motion()
+	_apply_wheel_suspension()
 
 
 func _get_sim_transform() -> Transform3D:
@@ -69,3 +81,16 @@ func _apply_wheel_motion() -> void:
 	_front_right_wheel.rotation.x = _wheel_rotation
 	_rear_left_wheel.rotation.x = _wheel_rotation
 	_rear_right_wheel.rotation.x = _wheel_rotation
+
+
+func _apply_wheel_suspension() -> void:
+	for wheel_index: int in range(_wheel_nodes.size()):
+		var wheel_ray: RayCast3D = _wheel_raycasts[wheel_index]
+		var wheel: Node3D = _wheel_nodes[wheel_index]
+		var rest_height: float = _wheel_rest_heights[wheel_index]
+		wheel_ray.force_raycast_update()
+		if wheel_ray.is_colliding():
+			var ground_point: Vector3 = _chassis_pivot.to_local(wheel_ray.get_collision_point())
+			wheel.position.y = clampf(ground_point.y + 0.21, rest_height - 0.1, rest_height + 0.1)
+		else:
+			wheel.position.y = rest_height
