@@ -11,6 +11,8 @@ var _gate_material: StandardMaterial3D
 var _drift_road_material: StandardMaterial3D
 var _recorded_commands: Array[InputCommandFrame] = []
 var _scripted_source: ScriptedInputSource
+var _comparison_kart: KartSimBody
+var _comparison_visual: KartVisualNode
 var _replay_mode: int = 0
 
 
@@ -41,8 +43,10 @@ func _physics_process(_delta: float) -> void:
 		))
 	elif _replay_mode == 2 and _scripted_source != null and _scripted_source._next_frame_index >= _scripted_source.frames.size():
 		_replay_mode = 0
-		_kart.input_source = LocalHumanInputSource.new()
-		_replay_button.text = "Grabar / reproducir inputs"
+		_kart.set_physics_process(false)
+		if _comparison_kart != null:
+			_comparison_kart.set_physics_process(false)
+		_replay_button.text = "Grabar otra comparación"
 		_readout.text += "   REPLAY COMPLETE"
 
 
@@ -58,8 +62,12 @@ func _process(_delta: float) -> void:
 
 func _on_replay_button_pressed() -> void:
 	if _replay_mode == 0:
+		_remove_comparison_kart()
 		_recorded_commands.clear()
 		_replay_mode = 1
+		_kart.set_physics_process(true)
+		_kart.apply_stats_resource(load("res://resources/karts/stats_balanced.tres").duplicate(true) as KartStatsResource)
+		_reset_kart(_kart, Vector3(0.0, 0.72, 145.0))
 		_kart.input_source = LocalHumanInputSource.new()
 		_replay_button.text = "Detener y reproducir"
 	elif _replay_mode == 1:
@@ -68,18 +76,62 @@ func _on_replay_button_pressed() -> void:
 		_scripted_source = ScriptedInputSource.new()
 		_scripted_source.frames = _recorded_commands.duplicate(true)
 		_replay_mode = 2
-		_kart.global_position = Vector3(0.0, 0.72, 145.0)
-		_kart.velocity = Vector3.ZERO
-		_kart.state = KartSimState.new()
-		_kart.state.position = _kart.global_position
-		_kart.state.heading_yaw = 0.0
-		_kart.simulation_tick = 0
+		_reset_kart(_kart, Vector3(-1.8, 0.72, 145.0))
 		_kart.input_source = _scripted_source
+		_create_comparison_kart(_recorded_commands)
 		_replay_button.text = "Parar replay"
 	else:
 		_replay_mode = 0
 		_kart.input_source = LocalHumanInputSource.new()
+		_kart.set_physics_process(true)
+		_remove_comparison_kart()
 		_replay_button.text = "Grabar / reproducir inputs"
+
+
+func _reset_kart(kart: KartSimBody, start_position: Vector3) -> void:
+	kart.global_position = start_position
+	kart.rotation = Vector3.ZERO
+	kart.velocity = Vector3.ZERO
+	kart.state = KartSimState.new()
+	kart.state.position = start_position
+	kart.state.heading_yaw = 0.0
+	kart.simulation_tick = 0
+
+
+func _create_comparison_kart(recorded_commands: Array[InputCommandFrame]) -> void:
+	_comparison_kart = KartSimBody.new()
+	_comparison_kart.name = "ComparisonKart"
+	_comparison_kart.racer_id = 1
+	_comparison_kart.stats = (load("res://resources/karts/stats_featherweight.tres") as KartStatsResource).duplicate(true)
+	_comparison_kart.position = Vector3(1.8, 0.72, 145.0)
+	add_child(_comparison_kart)
+	var comparison_source: ScriptedInputSource = ScriptedInputSource.new()
+	comparison_source.frames = recorded_commands.duplicate(true)
+	_comparison_kart.input_source = comparison_source
+	_comparison_visual = $KartVisual.duplicate() as KartVisualNode
+	_comparison_visual.name = "ComparisonVisual"
+	_comparison_visual.sim_body_path = NodePath("../ComparisonKart")
+	add_child(_comparison_visual)
+	var chassis: MeshInstance3D = _comparison_visual.get_node("ChassisPivot/Chassis") as MeshInstance3D
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.albedo_color = Color(1.0, 0.58, 0.12, 1.0)
+	chassis.material_override = material
+	var tag: Label3D = Label3D.new()
+	tag.position = Vector3(0.0, 1.4, 0.0)
+	tag.text = "FEATHERWEIGHT"
+	tag.font_size = 44
+	_comparison_visual.add_child(tag)
+	_kart.set_physics_process(true)
+	_comparison_kart.set_physics_process(true)
+
+
+func _remove_comparison_kart() -> void:
+	if is_instance_valid(_comparison_kart):
+		_comparison_kart.queue_free()
+	if is_instance_valid(_comparison_visual):
+		_comparison_visual.queue_free()
+	_comparison_kart = null
+	_comparison_visual = null
 
 
 func _build_distance_gates() -> void:

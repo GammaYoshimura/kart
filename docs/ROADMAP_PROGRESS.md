@@ -59,7 +59,7 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-097–F1-099** Overlay F3 con velocidad m/s/km/h, gráfica de cinco segundos, slip/derrape/mini-turbo/boost y estado de entradas.
 - [x] **F1-100** Dibujar vector de velocidad, dirección, cinco rayos de suelo y normales de contacto en F3.
 - [x] **F1-101** Panel F3 de hot tuning para tres presets, sliders en vivo y guardado local `.tres`.
-- [ ] **F1-102** Grabación y reproducción determinista implementada; falta el comparador lado a lado.
+- [x] **F1-102** Grabar inputs y reproducirlos con dos karts lado a lado (balanced vs featherweight).
 - [x] **F1-103–F1-106** Tests de aceleración/freno/reversa, drift/mini-turbo, masas/colisiones y trayectoria determinista de 1000 ticks.
 - [ ] **F1-107, F1-110** Export Windows creado; pendiente medir/confirmar 60 FPS en prueba interactiva y crear tag al cerrar todos los pendientes.
 - [x] **F1-109** Pipeline de siete fases de `KartSimBody.simulate_tick()` documentado en `ARCHITECTURE.md`.
@@ -71,4 +71,4 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-102**, grabación/reproducción A/B de vueltas.
+Siguiente trabajo: cerrar **F1-107** con una medición interactiva de rendimiento en Windows. F1-108 (Android) sigue aplazado hasta Fase 11 por instrucción del usuario.
