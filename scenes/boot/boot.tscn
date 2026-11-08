@@ -1,3 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://src/ui/debug/perf_overlay.tscn" id="1_perf_overlay"]
 
 [node name="root" type="Node" unique_id=1946739080]
+
+[node name="PerfOverlay" parent="." instance=ExtResource("1_perf_overlay")]

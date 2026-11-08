@@ -20,7 +20,9 @@ func save_profile(profile_id: String, data: PackedByteArray) -> bool:
 		file = FileAccess.open("user://profiles/%s.dat" % profile_id.validate_filename(), FileAccess.WRITE)
 	if file == null:
 		return false
-	return file.store_buffer(data) == data.size()
+	var write_succeeded: bool = file.store_buffer(data)
+	file.close()
+	return write_succeeded
 
 func load_profile(profile_id: String) -> PackedByteArray:
 	var path: String = "user://profiles/%s.dat" % profile_id.validate_filename()

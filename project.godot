@@ -16,10 +16,15 @@ config/version="0.1.0"
 run/main_scene="res://scenes/boot/boot.tscn"
 config/features=PackedStringArray("4.7")
 
+[audio]
+
+default_bus_layout="res://default_bus_layout.tres"
+
 [autoload]
 
 EventBus="*res://src/core/event_bus.gd"
 AppBootstrap="*res://src/core/app_bootstrap.gd"
+PerfMonitor="*res://src/core/performance_budget_monitor.gd"
 
 [debug]
 
@@ -146,6 +151,3 @@ common/physics_interpolation=true
 
 textures/vram_compression/import_s3tc_bptc=true
 textures/vram_compression/import_etc2_astc=true
-
-[audio]
-default_bus_layout="res://default_bus_layout.tres"
