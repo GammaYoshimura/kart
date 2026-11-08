@@ -16,6 +16,11 @@ var _wheel_rest_heights: Array[float] = []
 var _previous_transform: Transform3D
 var _current_transform: Transform3D
 var _wheel_rotation: float = 0.0
+var _trick_spin_remaining: float = 0.0
+var _squash_remaining: float = 0.0
+var _last_boost_ticks: int = 0
+const TRICK_SPIN_DURATION: float = 0.6
+const SQUASH_DURATION: float = 0.2
 
 
 func _ready() -> void:
@@ -41,12 +46,21 @@ func _ready() -> void:
 	_current_transform = _get_sim_transform()
 	_previous_transform = _current_transform
 	global_transform = _current_transform
+	_last_boost_ticks = _sim_body.state.boost_ticks_left
+	var trick_connection_error: int = EventBus.kart_trick_boosted.connect(_on_trick_boosted)
+	if trick_connection_error != OK:
+		push_error("KartVisualNode could not connect to trick boost events.")
 
 
 func _physics_process(delta: float) -> void:
 	_previous_transform = _current_transform
 	_current_transform = _get_sim_transform()
 	_wheel_rotation = fposmod(_wheel_rotation + _sim_body.state.forward_speed * delta / maxf(wheel_radius, 0.01), TAU)
+	if _sim_body.state.boost_ticks_left > 0 and _last_boost_ticks == 0:
+		_squash_remaining = SQUASH_DURATION
+	_last_boost_ticks = _sim_body.state.boost_ticks_left
+	_trick_spin_remaining = maxf(_trick_spin_remaining - delta, 0.0)
+	_squash_remaining = maxf(_squash_remaining - delta, 0.0)
 
 
 func _process(_delta: float) -> void:
@@ -66,11 +80,16 @@ func _get_sim_transform() -> Transform3D:
 func _apply_chassis_motion() -> void:
 	var state: KartSimState = _sim_body.state
 	var drift_yaw: float = -float(state.drift_dir) * deg_to_rad(18.0) if state.drift_state == 2 else 0.0
+	var spin_progress: float = 1.0 - _trick_spin_remaining / TRICK_SPIN_DURATION
+	var spin_yaw: float = TAU * clampf(spin_progress, 0.0, 1.0) if _trick_spin_remaining > 0.0 else 0.0
 	_chassis_pivot.rotation = Vector3(
 		-deg_to_rad(4.0) if state.boost_ticks_left > 0 else 0.0,
-		drift_yaw,
+		drift_yaw + spin_yaw,
 		-clampf(state.smoothed_steer_input * 0.12, -0.18, 0.18)
 	)
+	var squash_progress: float = 1.0 - _squash_remaining / SQUASH_DURATION
+	var squash: float = sin(clampf(squash_progress, 0.0, 1.0) * PI) if _squash_remaining > 0.0 else 0.0
+	_chassis_pivot.scale = Vector3(1.0 + squash * 0.08, 1.0 - squash * 0.1, 1.0 + squash * 0.08)
 	var front_steer: float = state.smoothed_steer_input * deg_to_rad(32.0)
 	_front_left_wheel.rotation.y = front_steer
 	_front_right_wheel.rotation.y = front_steer
@@ -94,3 +113,9 @@ func _apply_wheel_suspension() -> void:
 			wheel.position.y = clampf(ground_point.y + 0.21, rest_height - 0.1, rest_height + 0.1)
 		else:
 			wheel.position.y = rest_height
+
+
+func _on_trick_boosted(racer: int) -> void:
+	if _sim_body != null and racer == _sim_body.racer_id:
+		_trick_spin_remaining = TRICK_SPIN_DURATION
+		_squash_remaining = SQUASH_DURATION

@@ -268,6 +268,7 @@ func _move_and_resolve_collisions() -> void:
 			if state.trick_boost_armed:
 				apply_boost(45, stats.mt_1_speed_bonus)
 				state.trick_boost_armed = false
+				EventBus.kart_trick_boosted.emit(racer_id)
 	else:
 		state.airborne_ticks += 1
 	state.vertical_speed = velocity.dot(Vector3.UP)
