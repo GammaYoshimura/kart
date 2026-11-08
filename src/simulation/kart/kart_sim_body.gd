@@ -306,15 +306,20 @@ func _handle_wall_collision() -> void:
 		return
 	state.last_wall_normal = wall_normal
 	var impact_dot: float = absf(state.forward_dir.dot(wall_normal))
+	velocity = calculate_wall_response(velocity, wall_normal, impact_dot, stats.wall_bounce_impulse)
 	if impact_dot < 0.45:
-		velocity = velocity.slide(wall_normal) * 0.96
 		return
 	_cancel_drift()
-	velocity = velocity.slide(wall_normal) * 0.65 + wall_normal * stats.wall_bounce_impulse
 	state.forward_speed *= 1.0 - impact_dot * 0.35
 	if state.wall_contact_cooldown == 0:
 		EventBus.kart_wall_collision.emit(racer_id, impact_dot, contact_point)
 		state.wall_contact_cooldown = 12
+
+
+static func calculate_wall_response(impact_velocity: Vector3, wall_normal: Vector3, impact_dot: float, bounce_impulse: float) -> Vector3:
+	if impact_dot < 0.45:
+		return impact_velocity.slide(wall_normal) * 0.96
+	return impact_velocity.slide(wall_normal) * 0.65 + wall_normal * bounce_impulse
 
 
 func _ensure_collision_shape() -> void:

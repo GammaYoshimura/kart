@@ -61,13 +61,13 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-101** Panel F3 de hot tuning para tres presets, sliders en vivo y guardado local `.tres`.
 - [ ] **F1-102** Grabación y reproducción determinista implementada; falta el comparador lado a lado.
 - [x] **F1-103–F1-106** Tests de aceleración/freno/reversa, drift/mini-turbo, masas/colisiones y trayectoria determinista de 1000 ticks.
-- [ ] **F1-107, F1-110** Export Windows y tag de fase pendientes.
+- [ ] **F1-107, F1-110** Export Windows creado; pendiente medir/confirmar 60 FPS en prueba interactiva y crear tag al cerrar todos los pendientes.
 - [x] **F1-109** Pipeline de siete fases de `KartSimBody.simulate_tick()` documentado en `ARCHITECTURE.md`.
 - [ ] **F1-108** Aplazado hasta Fase 11 por instrucción del usuario.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
-**Pruebas Fase 1:** suite headless: 7 aprobadas, 0 fallidas, 154 aserciones.
+**Pruebas Fase 1:** suite headless: 7 aprobadas, 0 fallidas, 156 aserciones.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
