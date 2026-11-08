@@ -1,8 +1,9 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scenes/gameplay/playground.gd" id="1_game"]
 [ext_resource type="Script" path="res://src/simulation/kart/kart_sim_body.gd" id="2_kart"]
 [ext_resource type="Resource" path="res://resources/karts/stats_balanced.tres" id="3_stats"]
+[ext_resource type="Script" path="res://src/presentation/kart/kart_visual_node.gd" id="4_visual"]
 
 [sub_resource type="StandardMaterial3D" id="Mat_Track"]
 albedo_color = Color(0.095, 0.12, 0.15, 1)
@@ -99,57 +100,63 @@ position = Vector3(0, 0.72, 0)
 script = ExtResource("2_kart")
 stats = ExtResource("3_stats")
 
-[node name="Chassis" type="MeshInstance3D" parent="Kart"]
+[node name="KartVisual" type="Node3D" parent="."]
+script = ExtResource("4_visual")
+sim_body_path = NodePath("../Kart")
+
+[node name="ChassisPivot" type="Node3D" parent="KartVisual"]
+
+[node name="Chassis" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0, -0.08, 0)
 mesh = SubResource("Mesh_Chassis")
 surface_material_override/0 = SubResource("Mat_Kart")
 
-[node name="Nose" type="MeshInstance3D" parent="Kart"]
+[node name="Nose" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0, -0.03, -1.05)
 mesh = SubResource("Mesh_Nose")
 surface_material_override/0 = SubResource("Mat_Accent")
 
-[node name="Seat" type="MeshInstance3D" parent="Kart"]
+[node name="Seat" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0, 0.3, 0.2)
 mesh = SubResource("Mesh_Seat")
 surface_material_override/0 = SubResource("Mat_Accent")
 
-[node name="WheelFL" type="MeshInstance3D" parent="Kart"]
+[node name="WheelFL" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(-0.78, -0.2, -0.66)
 mesh = SubResource("Mesh_Wheel")
 surface_material_override/0 = SubResource("Mat_Tire")
 
-[node name="WheelFR" type="MeshInstance3D" parent="Kart"]
+[node name="WheelFR" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0.78, -0.2, -0.66)
 mesh = SubResource("Mesh_Wheel")
 surface_material_override/0 = SubResource("Mat_Tire")
 
-[node name="WheelRL" type="MeshInstance3D" parent="Kart"]
+[node name="WheelRL" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(-0.78, -0.2, 0.68)
 mesh = SubResource("Mesh_Wheel")
 surface_material_override/0 = SubResource("Mat_Tire")
 
-[node name="WheelRR" type="MeshInstance3D" parent="Kart"]
+[node name="WheelRR" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0.78, -0.2, 0.68)
 mesh = SubResource("Mesh_Wheel")
 surface_material_override/0 = SubResource("Mat_Tire")
 
-[node name="RearWing" type="MeshInstance3D" parent="Kart"]
+[node name="RearWing" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0, 0.24, 0.94)
 mesh = SubResource("Mesh_RearWing")
 surface_material_override/0 = SubResource("Mat_Wing")
 
-[node name="TailLightLeft" type="MeshInstance3D" parent="Kart"]
+[node name="TailLightLeft" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(-0.5, 0.02, 1.08)
 mesh = SubResource("Mesh_TailLight")
 surface_material_override/0 = SubResource("Mat_Tail")
 
-[node name="TailLightRight" type="MeshInstance3D" parent="Kart"]
+[node name="TailLightRight" type="MeshInstance3D" parent="KartVisual/ChassisPivot"]
 position = Vector3(0.5, 0.02, 1.08)
 mesh = SubResource("Mesh_TailLight")
 surface_material_override/0 = SubResource("Mat_Tail")
 
-[node name="Camera3D" type="Camera3D" parent="Kart"]
+[node name="Camera3D" type="Camera3D" parent="KartVisual"]
 position = Vector3(0, 4.6, 8.5)
 rotation_degrees = Vector3(-25, 0, 0)
 current = true
