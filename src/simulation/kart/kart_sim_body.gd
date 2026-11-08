@@ -1,7 +1,10 @@
 class_name KartSimBody
 extends CharacterBody3D
 
+const GROUND_ALIGN_SPEED: float = 10.0
+
 @export var stats: KartStatsResource
+@export var racer_id: int = 0
 @export_range(0.1, 2.0, 0.05) var surface_speed_mult: float = 1.0
 @export_range(0.1, 2.0, 0.05) var surface_acceleration_mult: float = 1.0
 @export_range(0.1, 2.0, 0.05) var surface_grip_mult: float = 1.0
@@ -9,6 +12,7 @@ extends CharacterBody3D
 var state: KartSimState = KartSimState.new()
 var input_source: KartInputSource
 var simulation_tick: int = 0
+var _ground_raycasts: Array[RayCast3D] = []
 
 
 func _ready() -> void:
@@ -20,9 +24,11 @@ func _ready() -> void:
 		return
 	input_source = LocalHumanInputSource.new()
 	floor_max_angle = deg_to_rad(stats.max_driveable_slope_deg)
+	floor_snap_length = stats.ground_snap_distance
 	collision_layer = 1 << 2
 	collision_mask = (1 << 0) | (1 << 1) | (1 << 2)
 	_ensure_collision_shape()
+	_setup_ground_raycasts()
 	state.position = global_position
 	state.heading_yaw = rotation.y
 
@@ -39,7 +45,7 @@ func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 		return
 	state.just_landed_this_tick = false
 	state.update_drift_hop_buffer(command)
-	_update_ground_and_surface_sensors()
+	_update_ground_and_surface_sensors(delta)
 	_update_status_and_boost_timers()
 	_update_hop_and_drift_state(command)
 	_update_steering_and_heading(command, delta)
@@ -54,11 +60,23 @@ func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 	_move_and_resolve_collisions()
 
 
-func _update_ground_and_surface_sensors() -> void:
-	state.is_grounded = is_on_floor()
+func _update_ground_and_surface_sensors(delta: float) -> void:
+	var normal_sum: Vector3 = Vector3.ZERO
+	var hit_count: int = 0
+	for raycast: RayCast3D in _ground_raycasts:
+		raycast.force_raycast_update()
+		if raycast.is_colliding():
+			normal_sum += raycast.get_collision_normal()
+			hit_count += 1
+	var ascending_hop: bool = state.drift_state == 1 and state.vertical_speed > 0.0
+	var has_walkable_ground: bool = hit_count > 0
+	if has_walkable_ground:
+		var average_normal: Vector3 = (normal_sum / float(hit_count)).normalized()
+		has_walkable_ground = average_normal.dot(Vector3.UP) >= cos(deg_to_rad(stats.max_driveable_slope_deg))
+	state.is_grounded = has_walkable_ground and state.vertical_speed <= 2.0 and not ascending_hop
 	if state.is_grounded:
-		state.ground_normal = get_floor_normal()
-		state.up_normal = state.ground_normal
+		state.ground_normal = (normal_sum / float(hit_count)).normalized()
+		state.up_normal = state.up_normal.slerp(state.ground_normal, minf(GROUND_ALIGN_SPEED * delta, 1.0)).normalized()
 		if state.vertical_speed < 0.0:
 			state.vertical_speed = 0.0
 	state.current_surface_id = 0
@@ -123,6 +141,8 @@ func _update_steering_and_heading(command: InputCommandFrame, delta: float) -> v
 	var speed_turn_factor: float = stats.steer_speed_curve.sample_baked(speed_ratio)
 	if absf(state.forward_speed) < 0.1:
 		speed_turn_factor = 0.0
+	if not state.is_grounded:
+		speed_turn_factor *= stats.air_steer_factor
 	var reverse_factor: float = -1.0 if state.forward_speed < -0.2 else 1.0
 	state.heading_yaw -= deg_to_rad(stats.max_steer_angle_deg) * state.smoothed_steer_input * speed_turn_factor * reverse_factor * delta
 	rotation.y = state.heading_yaw
@@ -171,6 +191,7 @@ func _apply_gravity_and_slopes(delta: float) -> void:
 
 func _move_and_resolve_collisions() -> void:
 	var was_grounded: bool = state.is_grounded
+	var impact_speed: float = absf(state.vertical_speed)
 	var collided: bool = move_and_slide()
 	if collided and is_on_wall():
 		state.last_wall_normal = get_wall_normal()
@@ -183,7 +204,9 @@ func _move_and_resolve_collisions() -> void:
 		state.up_normal = state.ground_normal
 		if not was_grounded:
 			state.just_landed_this_tick = true
-			state.landing_impact_speed = absf(state.vertical_speed)
+			state.landing_impact_speed = impact_speed
+			velocity = velocity.slide(state.ground_normal)
+			EventBus.kart_landed.emit(racer_id, state.landing_impact_speed)
 	else:
 		state.airborne_ticks += 1
 	state.vertical_speed = velocity.dot(Vector3.UP)
@@ -201,3 +224,22 @@ func _ensure_collision_shape() -> void:
 	var sphere: SphereShape3D = SphereShape3D.new()
 	sphere.radius = stats.collision_sphere_radius
 	collision_shape.shape = sphere
+
+
+func _setup_ground_raycasts() -> void:
+	var offsets: Array[Vector3] = [
+		Vector3.ZERO,
+		Vector3(-0.75, 0.0, -1.0),
+		Vector3(0.75, 0.0, -1.0),
+		Vector3(-0.75, 0.0, 1.0),
+		Vector3(0.75, 0.0, 1.0),
+	]
+	for index: int in range(offsets.size()):
+		var raycast: RayCast3D = RayCast3D.new()
+		raycast.name = "GroundRay_%d" % index
+		raycast.position = offsets[index]
+		raycast.target_position = Vector3.DOWN * (stats.collision_sphere_radius + stats.ground_snap_distance + 0.5)
+		raycast.collision_mask = 1
+		raycast.enabled = true
+		add_child(raycast)
+		_ground_raycasts.append(raycast)
