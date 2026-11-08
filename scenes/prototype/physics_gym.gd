@@ -23,6 +23,7 @@ func _ready() -> void:
 	_build_drift_sector()
 	_build_ramp_sector()
 	_build_surface_sector()
+	_build_collision_sector()
 
 
 func _process(_delta: float) -> void:
@@ -212,3 +213,86 @@ func _add_boost_pad(pad_position: Vector3) -> void:
 	collision.shape = shape
 	pad.add_child(collision)
 	add_child(pad)
+
+
+func _build_collision_sector() -> void:
+	_add_static_test_box("CollisionArenaFloor", Vector3(-155.0, -0.15, 0.0), Vector3(90.0, 0.3, 70.0), 0.0, _drift_road_material, 1)
+	_add_static_test_box("ImpactWall_15", Vector3(-178.0, 0.65, -10.0), Vector3(18.0, 1.3, 0.8), 15.0, _gate_material, 2)
+	_add_static_test_box("ImpactWall_45", Vector3(-155.0, 0.65, -10.0), Vector3(18.0, 1.3, 0.8), 45.0, _gate_material, 2)
+	_add_static_test_box("ImpactWall_90", Vector3(-132.0, 0.65, -10.0), Vector3(18.0, 1.3, 0.8), 90.0, _gate_material, 2)
+	_add_cylinder_pillar(Vector3(-178.0, 1.0, 12.0), 1.1)
+	_add_cylinder_pillar(Vector3(-155.0, 1.0, 12.0), 1.6)
+	_add_cylinder_pillar(Vector3(-132.0, 1.0, 12.0), 2.1)
+	_add_kart_dummy("Dummy_Light_75kg", Vector3(-174.0, 0.72, 25.0), Color(0.25, 0.85, 1.0), 75.0)
+	_add_kart_dummy("Dummy_Balanced_100kg", Vector3(-155.0, 0.72, 25.0), Color(0.35, 1.0, 0.4), 100.0)
+	_add_kart_dummy("Dummy_Heavy_130kg", Vector3(-136.0, 0.72, 25.0), Color(1.0, 0.42, 0.12), 130.0)
+	_add_sector_label("COLLISION ARENA  /  MUROS 15° · 45° · 90°  /  MASAS 75 · 100 · 130 kg", Vector3(-155.0, 7.0, -32.0))
+
+
+func _add_static_test_box(node_name: String, body_position: Vector3, box_size: Vector3, yaw_degrees: float, material: StandardMaterial3D, layer: int) -> void:
+	var body: StaticBody3D = StaticBody3D.new()
+	body.name = node_name
+	body.position = body_position
+	body.rotation.y = deg_to_rad(yaw_degrees)
+	body.collision_layer = layer
+	var mesh: BoxMesh = BoxMesh.new()
+	mesh.size = box_size
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.mesh = mesh
+	mesh_instance.material_override = material
+	body.add_child(mesh_instance)
+	var shape: BoxShape3D = BoxShape3D.new()
+	shape.size = box_size
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	body.add_child(collision)
+	add_child(body)
+
+
+func _add_cylinder_pillar(pillar_position: Vector3, radius: float) -> void:
+	var pillar: StaticBody3D = StaticBody3D.new()
+	pillar.name = "CollisionPillar_%.1f" % radius
+	pillar.position = pillar_position
+	pillar.collision_layer = 2
+	var mesh: CylinderMesh = CylinderMesh.new()
+	mesh.top_radius = radius
+	mesh.bottom_radius = radius
+	mesh.height = 2.0
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.mesh = mesh
+	mesh_instance.material_override = _gate_material
+	pillar.add_child(mesh_instance)
+	var shape: CylinderShape3D = CylinderShape3D.new()
+	shape.radius = radius
+	shape.height = 2.0
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	pillar.add_child(collision)
+	add_child(pillar)
+
+
+func _add_kart_dummy(dummy_name: String, dummy_position: Vector3, kart_color: Color, weight_mass: float) -> void:
+	var dummy: StaticBody3D = StaticBody3D.new()
+	dummy.name = dummy_name
+	dummy.position = dummy_position
+	dummy.collision_layer = 1 << 2
+	dummy.set_meta("weight_mass", weight_mass)
+	var material: StandardMaterial3D = StandardMaterial3D.new()
+	material.albedo_color = kart_color
+	var chassis: BoxMesh = BoxMesh.new()
+	chassis.size = Vector3(1.45, 0.48, 2.1)
+	var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+	mesh_instance.mesh = chassis
+	mesh_instance.material_override = material
+	dummy.add_child(mesh_instance)
+	var shape: SphereShape3D = SphereShape3D.new()
+	shape.radius = 0.65
+	var collision: CollisionShape3D = CollisionShape3D.new()
+	collision.shape = shape
+	dummy.add_child(collision)
+	var label: Label3D = Label3D.new()
+	label.position = Vector3(0.0, 1.0, 0.0)
+	label.text = "%s kg" % roundi(weight_mass)
+	label.font_size = 48
+	dummy.add_child(label)
+	add_child(dummy)
