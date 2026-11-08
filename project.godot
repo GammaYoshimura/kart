@@ -1,35 +1,132 @@
 ; Engine configuration file.
-; Kart Arcade 3D Multijugador
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
 config_version=5
 
 [application]
+
 config/name="Kart Arcade 3D"
 config/description="Juego de carreras arcade 3D multijugador."
 config/version="0.1.0"
 run/main_scene="res://scenes/boot/boot.tscn"
+config/features=PackedStringArray("4.7")
 
-[physics]
-3d/default_gravity=9.8
-3d/default_gravity_vector=Vector3(0, -1, 0)
-3d/default_linear_damp=0.0
-3d/default_angular_damp=0.0
-common/physics_ticks_per_second=60
-common/max_physics_steps_per_frame=8
-common/physics_interpolation=true
+[autoload]
+
+EventBus="*res://src/core/event_bus.gd"
+AppBootstrap="*res://src/core/app_bootstrap.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=2
+gdscript/warnings/unsafe_method_access=1
+gdscript/warnings/return_value_discarded=1
 
 [display]
+
 window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[rendering]
-renderer/rendering_method="forward_plus"
-renderer/rendering_method.mobile="mobile"
-textures/vram_compression/import_s3tc_bptc=true
-textures/vram_compression/import_etc2_astc=true
+[input]
+
+ui_cancel={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+accelerate={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":87,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194322,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+brake_reverse={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":83,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194324,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+steer_left={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":65,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194319,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+steer_right={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":68,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+, Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194321,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+drift_hop={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":32,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+use_item={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":69,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+look_back={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+aim_forward={
+"deadzone": 0.2,
+"events": []
+}
+aim_backward={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+respawn_request={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":82,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+pause={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194305,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+toggle_driving_debug={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194322,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+toggle_net_debug={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194323,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+toggle_perf_overlay={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194324,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
+toggle_free_camera={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":16,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194325,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
+]
+}
 
 [layer_names]
+
+3d_render/layer_1="World_Geometry"
+3d_render/layer_2="Karts_And_Drivers"
+3d_render/layer_3="VFX_Particles"
+3d_render/layer_4="Minimap_Ortho_Only"
+3d_render/layer_5="Editor_Debug_Gizmos"
 3d_physics/layer_1="Track_Road"
 3d_physics/layer_2="Track_Wall"
 3d_physics/layer_3="Kart_Hull"
@@ -38,81 +135,14 @@ textures/vram_compression/import_etc2_astc=true
 3d_physics/layer_6="Projectile_Hazard"
 3d_physics/layer_7="Killzone_Respawn"
 3d_physics/layer_8="Boost_Zone"
-3d_render/layer_1="World_Geometry"
-3d_render/layer_2="Karts_And_Drivers"
-3d_render/layer_3="VFX_Particles"
-3d_render/layer_4="Minimap_Ortho_Only"
-3d_render/layer_5="Editor_Debug_Gizmos"
-[input]
 
-accelerate={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":87), Object(InputEventKey,"physical_keycode":4194322)]
-}
-brake_reverse={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":83), Object(InputEventKey,"physical_keycode":4194324)]
-}
-steer_left={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":65), Object(InputEventKey,"physical_keycode":4194319)]
-}
-steer_right={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":68), Object(InputEventKey,"physical_keycode":4194321)]
-}
-drift_hop={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":32)]
-}
-use_item={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":69)]
-}
-look_back={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":81)]
-}
-aim_forward={
-"deadzone": 0.2,
-"events": []
-}
-aim_backward={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":81)]
-}
-respawn_request={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":82)]
-}
-pause={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194305)]
-}
-ui_cancel={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194305)]
-}
-toggle_driving_debug={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194322)]
-}
-toggle_net_debug={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194323)]
-}
-toggle_perf_overlay={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194324)]
-}
-toggle_free_camera={
-"deadzone": 0.2,
-"events": [Object(InputEventKey,"physical_keycode":4194325)]
-}
+[physics]
 
-[debug]
+3d/default_linear_damp=0.0
+3d/default_angular_damp=0.0
+common/physics_interpolation=true
 
-gdscript/warnings/untyped_declaration=2
-gdscript/warnings/unsafe_method_access=1
-gdscript/warnings/unused_signal=1
-gdscript/warnings/return_value_discarded=1
+[rendering]
+
+textures/vram_compression/import_s3tc_bptc=true
+textures/vram_compression/import_etc2_astc=true
