@@ -326,6 +326,18 @@ func _ensure_collision_shape() -> void:
 	var sphere: SphereShape3D = SphereShape3D.new()
 	sphere.radius = stats.collision_sphere_radius
 	collision_shape.shape = sphere
+	for raycast: RayCast3D in _ground_raycasts:
+		raycast.target_position = Vector3.DOWN * (stats.collision_sphere_radius + stats.ground_snap_distance + 0.5)
+
+
+func apply_stats_resource(new_stats: KartStatsResource) -> void:
+	if new_stats == null or not new_stats.is_valid():
+		push_error("Cannot apply invalid kart stats.")
+		return
+	stats = new_stats
+	floor_max_angle = deg_to_rad(stats.max_driveable_slope_deg)
+	floor_snap_length = stats.ground_snap_distance
+	_ensure_collision_shape()
 
 
 func _setup_ground_raycasts() -> void:

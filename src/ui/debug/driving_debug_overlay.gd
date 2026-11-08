@@ -8,6 +8,14 @@ extends CanvasLayer
 @onready var _input_label: Label = $Panel/Margin/VBox/Input
 @onready var _buttons_label: Label = $Panel/Margin/VBox/Buttons
 @onready var _graph: Control = $Panel/Margin/VBox/SpeedGraph
+@onready var _preset: OptionButton = $Panel/Margin/VBox/Tuning/Preset
+@onready var _max_speed_slider: HSlider = $Panel/Margin/VBox/Tuning/SpeedRow/MaxSpeed
+@onready var _acceleration_slider: HSlider = $Panel/Margin/VBox/Tuning/AccelerationRow/Acceleration
+@onready var _grip_slider: HSlider = $Panel/Margin/VBox/Tuning/GripRow/Grip
+@onready var _max_speed_value: Label = $Panel/Margin/VBox/Tuning/SpeedRow/Value
+@onready var _acceleration_value: Label = $Panel/Margin/VBox/Tuning/AccelerationRow/Value
+@onready var _grip_value: Label = $Panel/Margin/VBox/Tuning/GripRow/Value
+@onready var _save_status: Label = $Panel/Margin/VBox/Tuning/SaveStatus
 
 var _target: KartSimBody
 var _speed_history: Array[float] = []
@@ -19,6 +27,18 @@ func _ready() -> void:
 	_panel.visible = false
 	if _target == null:
 		push_error("DrivingDebugOverlay requires a KartSimBody target.")
+		return
+	_preset.add_item("Balanced")
+	_preset.add_item("Featherweight")
+	_preset.add_item("Heavyweight")
+	var preset_error: int = _preset.item_selected.connect(_on_preset_selected)
+	var speed_error: int = _max_speed_slider.value_changed.connect(_on_tuning_changed)
+	var acceleration_error: int = _acceleration_slider.value_changed.connect(_on_tuning_changed)
+	var grip_error: int = _grip_slider.value_changed.connect(_on_tuning_changed)
+	var save_error: int = ($Panel/Margin/VBox/Tuning/SaveButton as Button).pressed.connect(_on_save_pressed)
+	if preset_error != OK or speed_error != OK or acceleration_error != OK or grip_error != OK or save_error != OK:
+		push_error("DrivingDebugOverlay failed to connect tuning controls.")
+	_sync_tuning_controls()
 
 
 func _process(delta: float) -> void:
@@ -56,3 +76,41 @@ func _process(delta: float) -> void:
 
 func _on_off(value: bool) -> String:
 	return "ON" if value else "--"
+
+
+func _on_preset_selected(index: int) -> void:
+	var preset_paths: Array[String] = [
+		"res://resources/karts/stats_balanced.tres",
+		"res://resources/karts/stats_featherweight.tres",
+		"res://resources/karts/stats_heavyweight.tres",
+	]
+	var source: KartStatsResource = load(preset_paths[clampi(index, 0, preset_paths.size() - 1)]) as KartStatsResource
+	_target.apply_stats_resource(source.duplicate(true) as KartStatsResource)
+	_sync_tuning_controls()
+
+
+func _on_tuning_changed(_value: float = 0.0) -> void:
+	if _target == null:
+		return
+	_target.stats.max_speed_forward = _max_speed_slider.value
+	_target.stats.base_acceleration = _acceleration_slider.value
+	_target.stats.lateral_grip_grounded = _grip_slider.value
+	_max_speed_value.text = "%.1f" % _max_speed_slider.value
+	_acceleration_value.text = "%.1f" % _acceleration_slider.value
+	_grip_value.text = "%.1f" % _grip_slider.value
+	_save_status.text = "Unsaved tuning"
+
+
+func _sync_tuning_controls() -> void:
+	_max_speed_slider.value = _target.stats.max_speed_forward
+	_acceleration_slider.value = _target.stats.base_acceleration
+	_grip_slider.value = _target.stats.lateral_grip_grounded
+	_max_speed_value.text = "%.1f" % _max_speed_slider.value
+	_acceleration_value.text = "%.1f" % _acceleration_slider.value
+	_grip_value.text = "%.1f" % _grip_slider.value
+	_save_status.text = ""
+
+
+func _on_save_pressed() -> void:
+	var save_error: Error = ResourceSaver.save(_target.stats, "user://kart_stats_tuned.tres")
+	_save_status.text = "Saved to user://kart_stats_tuned.tres" if save_error == OK else "Save failed: %s" % error_string(save_error)

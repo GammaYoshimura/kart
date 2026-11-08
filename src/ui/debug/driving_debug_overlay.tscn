@@ -10,7 +10,7 @@ script = ExtResource("1_overlay")
 offset_left = 24.0
 offset_top = 142.0
 offset_right = 430.0
-offset_bottom = 560.0
+offset_bottom = 830.0
 
 [node name="Margin" type="MarginContainer" parent="Panel"]
 theme_override_constants/margin_left = 14
@@ -43,3 +43,88 @@ text = "HOP --  ITEM --  LOOK --  RESPAWN --"
 custom_minimum_size = Vector2(360, 155)
 layout_mode = 2
 script = ExtResource("2_graph")
+
+[node name="Tuning" type="VBoxContainer" parent="Panel/Margin/VBox"]
+theme_override_constants/separation = 5
+
+[node name="TuningTitle" type="Label" parent="Panel/Margin/VBox/Tuning"]
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 0.72, 0.25, 1)
+text = "HOT TUNING"
+
+[node name="Preset" type="OptionButton" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+
+[node name="SpeedRow" type="HBoxContainer" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Tuning/SpeedRow"]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "Top speed"
+
+[node name="MaxSpeed" type="HSlider" parent="Panel/Margin/VBox/Tuning/SpeedRow"]
+custom_minimum_size = Vector2(190, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 20.0
+max_value = 40.0
+step = 0.5
+value = 32.0
+
+[node name="Value" type="Label" parent="Panel/Margin/VBox/Tuning/SpeedRow"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+text = "32.0"
+
+[node name="AccelerationRow" type="HBoxContainer" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Tuning/AccelerationRow"]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "Acceleration"
+
+[node name="Acceleration" type="HSlider" parent="Panel/Margin/VBox/Tuning/AccelerationRow"]
+custom_minimum_size = Vector2(190, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 8.0
+max_value = 30.0
+step = 0.5
+value = 18.0
+
+[node name="Value" type="Label" parent="Panel/Margin/VBox/Tuning/AccelerationRow"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+text = "18.0"
+
+[node name="GripRow" type="HBoxContainer" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Panel/Margin/VBox/Tuning/GripRow"]
+custom_minimum_size = Vector2(95, 0)
+layout_mode = 2
+text = "Grip"
+
+[node name="Grip" type="HSlider" parent="Panel/Margin/VBox/Tuning/GripRow"]
+custom_minimum_size = Vector2(190, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 3.0
+max_value = 22.0
+step = 0.5
+value = 14.0
+
+[node name="Value" type="Label" parent="Panel/Margin/VBox/Tuning/GripRow"]
+custom_minimum_size = Vector2(42, 0)
+layout_mode = 2
+text = "14.0"
+
+[node name="SaveButton" type="Button" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+text = "Save tuned stats"
+
+[node name="SaveStatus" type="Label" parent="Panel/Margin/VBox/Tuning"]
+layout_mode = 2
+text = ""
