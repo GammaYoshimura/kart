@@ -56,12 +56,12 @@ func consume_drift_hop_buffer(current_tick: int, grounded: bool) -> bool:
 
 func write_to_buffer(buf: StreamPeerBuffer) -> void:
 	buf.big_endian = false
-	buf.put_vector3(position)
-	buf.put_vector3(linear_velocity)
+	_write_vector3(buf, position)
+	_write_vector3(buf, linear_velocity)
 	buf.put_float(heading_yaw)
-	buf.put_vector3(forward_dir)
-	buf.put_vector3(right_dir)
-	buf.put_vector3(up_normal)
+	_write_vector3(buf, forward_dir)
+	_write_vector3(buf, right_dir)
+	_write_vector3(buf, up_normal)
 	buf.put_float(forward_speed)
 	buf.put_float(lateral_speed)
 	buf.put_float(vertical_speed)
@@ -71,7 +71,7 @@ func write_to_buffer(buf: StreamPeerBuffer) -> void:
 	buf.put_u8(1 if just_landed_this_tick else 0)
 	buf.put_float(landing_impact_speed)
 	buf.put_32(current_surface_id)
-	buf.put_vector3(ground_normal)
+	_write_vector3(buf, ground_normal)
 	buf.put_8(drift_state)
 	buf.put_8(drift_dir)
 	buf.put_32(hop_ticks_left)
@@ -82,19 +82,19 @@ func write_to_buffer(buf: StreamPeerBuffer) -> void:
 	buf.put_u8(1 if trick_boost_armed else 0)
 	buf.put_32(wall_contact_cooldown)
 	buf.put_32(kart_bump_cooldown)
-	buf.put_vector3(last_wall_normal)
+	_write_vector3(buf, last_wall_normal)
 	buf.put_32(drift_hop_buffer_tick)
 	buf.put_u8(1 if last_drift_hop_pressed else 0)
 
 
 func read_from_buffer(buf: StreamPeerBuffer) -> void:
 	buf.big_endian = false
-	position = buf.get_vector3()
-	linear_velocity = buf.get_vector3()
+	position = _read_vector3(buf)
+	linear_velocity = _read_vector3(buf)
 	heading_yaw = buf.get_float()
-	forward_dir = buf.get_vector3()
-	right_dir = buf.get_vector3()
-	up_normal = buf.get_vector3()
+	forward_dir = _read_vector3(buf)
+	right_dir = _read_vector3(buf)
+	up_normal = _read_vector3(buf)
 	forward_speed = buf.get_float()
 	lateral_speed = buf.get_float()
 	vertical_speed = buf.get_float()
@@ -104,7 +104,7 @@ func read_from_buffer(buf: StreamPeerBuffer) -> void:
 	just_landed_this_tick = buf.get_u8() != 0
 	landing_impact_speed = buf.get_float()
 	current_surface_id = buf.get_32()
-	ground_normal = buf.get_vector3()
+	ground_normal = _read_vector3(buf)
 	drift_state = buf.get_8()
 	drift_dir = buf.get_8()
 	hop_ticks_left = buf.get_32()
@@ -115,7 +115,7 @@ func read_from_buffer(buf: StreamPeerBuffer) -> void:
 	trick_boost_armed = buf.get_u8() != 0
 	wall_contact_cooldown = buf.get_32()
 	kart_bump_cooldown = buf.get_32()
-	last_wall_normal = buf.get_vector3()
+	last_wall_normal = _read_vector3(buf)
 	drift_hop_buffer_tick = buf.get_32()
 	last_drift_hop_pressed = buf.get_u8() != 0
 
@@ -150,3 +150,13 @@ func copy_from(other: KartSimState) -> void:
 	last_wall_normal = other.last_wall_normal
 	drift_hop_buffer_tick = other.drift_hop_buffer_tick
 	last_drift_hop_pressed = other.last_drift_hop_pressed
+
+
+func _write_vector3(buf: StreamPeerBuffer, value: Vector3) -> void:
+	buf.put_float(value.x)
+	buf.put_float(value.y)
+	buf.put_float(value.z)
+
+
+func _read_vector3(buf: StreamPeerBuffer) -> Vector3:
+	return Vector3(buf.get_float(), buf.get_float(), buf.get_float())

@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=22 format=3]
 
 [ext_resource type="Script" path="res://scenes/gameplay/playground.gd" id="1_game"]
 [ext_resource type="Script" path="res://src/simulation/kart/kart_sim_body.gd" id="2_kart"]
@@ -24,6 +24,16 @@ roughness = 0.9
 [sub_resource type="StandardMaterial3D" id="Mat_Wall"]
 albedo_color = Color(0.98, 0.32, 0.12, 1)
 roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Mat_Tail"]
+albedo_color = Color(1, 0.06, 0.035, 1)
+emission_enabled = true
+emission = Color(1, 0.035, 0.015, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_Wing"]
+albedo_color = Color(0.95, 0.15, 0.08, 1)
+roughness = 0.38
 
 [sub_resource type="Environment" id="Environment_Play"]
 background_mode = 1
@@ -55,6 +65,12 @@ size = Vector3(0.32, 0.42, 0.55)
 
 [sub_resource type="BoxMesh" id="Mesh_Wall"]
 size = Vector3(30, 1.2, 0.5)
+
+[sub_resource type="BoxMesh" id="Mesh_TailLight"]
+size = Vector3(0.24, 0.12, 0.06)
+
+[sub_resource type="BoxMesh" id="Mesh_RearWing"]
+size = Vector3(1.55, 0.12, 0.24)
 
 [node name="Playground" type="Node3D"]
 script = ExtResource("1_game")
@@ -117,6 +133,21 @@ surface_material_override/0 = SubResource("Mat_Tire")
 position = Vector3(0.78, -0.2, 0.68)
 mesh = SubResource("Mesh_Wheel")
 surface_material_override/0 = SubResource("Mat_Tire")
+
+[node name="RearWing" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0, 0.24, 0.94)
+mesh = SubResource("Mesh_RearWing")
+surface_material_override/0 = SubResource("Mat_Wing")
+
+[node name="TailLightLeft" type="MeshInstance3D" parent="Kart"]
+position = Vector3(-0.5, 0.02, 1.08)
+mesh = SubResource("Mesh_TailLight")
+surface_material_override/0 = SubResource("Mat_Tail")
+
+[node name="TailLightRight" type="MeshInstance3D" parent="Kart"]
+position = Vector3(0.5, 0.02, 1.08)
+mesh = SubResource("Mesh_TailLight")
+surface_material_override/0 = SubResource("Mat_Tail")
 
 [node name="Camera3D" type="Camera3D" parent="Kart"]
 position = Vector3(0, 4.6, 8.5)

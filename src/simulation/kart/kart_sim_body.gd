@@ -121,7 +121,7 @@ func _update_steering_and_heading(command: InputCommandFrame, delta: float) -> v
 	if absf(state.forward_speed) < 0.1:
 		speed_turn_factor = 0.0
 	var reverse_factor: float = -1.0 if state.forward_speed < -0.2 else 1.0
-	state.heading_yaw += deg_to_rad(stats.max_steer_angle_deg) * state.smoothed_steer_input * speed_turn_factor * reverse_factor * delta
+	state.heading_yaw -= deg_to_rad(stats.max_steer_angle_deg) * state.smoothed_steer_input * speed_turn_factor * reverse_factor * delta
 	rotation.y = state.heading_yaw
 	state.forward_dir = Vector3.FORWARD.rotated(Vector3.UP, state.heading_yaw).normalized()
 	state.right_dir = Vector3.RIGHT.rotated(Vector3.UP, state.heading_yaw).normalized()
@@ -164,7 +164,9 @@ func _apply_gravity_and_slopes(delta: float) -> void:
 
 func _move_and_resolve_collisions() -> void:
 	var was_grounded: bool = state.is_grounded
-	move_and_slide()
+	var collided: bool = move_and_slide()
+	if collided and is_on_wall():
+		state.last_wall_normal = get_wall_normal()
 	state.position = global_position
 	state.linear_velocity = velocity
 	state.is_grounded = is_on_floor()

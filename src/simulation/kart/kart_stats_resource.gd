@@ -112,5 +112,7 @@ func _make_curve(points: Array[Vector2]) -> Curve:
 	var curve: Curve = Curve.new()
 	curve.bake_resolution = 64
 	for point: Vector2 in points:
-		curve.add_point(point)
+		var point_index: int = curve.add_point(point)
+		if point_index < 0:
+			push_error("Failed to create a kart handling curve.")
 	return curve

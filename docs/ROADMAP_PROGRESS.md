@@ -44,6 +44,6 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
-**Pantalla Play:** ahora abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; dirección: A/D o flechas; hop/derrape: Espacio.
+**Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
 Siguiente trabajo de producto: **F1-031**, límites de velocidad con modificadores de superficie y turbo. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
