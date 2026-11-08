@@ -42,10 +42,12 @@ Este registro acompaña a `ROADMAP.md`, que se mantiene fuera de Git por decisi�
 - [x] **F1-031–F1-032, F1-041–F1-042** Límites efectivos con suelo/boost, aceleración modulable por superficie, proyección de velocidad y agarre de asfalto/derrape/hielo.
 - [x] **F1-033–F1-040** Sobrevelocidad, inercia/freno/reversa, suavizado de dirección y giro según velocidad.
 - [x] **F1-043–F1-046, F1-048–F1-050** Cinco sensores de suelo, normal promedio, alineación, snap, gravedad aérea, autoridad de giro aérea, aterrizaje y ángulo máximo de suelo transitable.
-- [ ] **F1-047** Transferencia de impulso vertical al salir de una rampa pendiente de pulir.
+- [x] **F1-047** Conservación de la velocidad tangencial de la pendiente para formar el arco al salir de una rampa.
+- [x] **F1-051–F1-060, F1-062–F1-063** Hop y entrada al derrape, ley de giro y carga por ticks en suelo, niveles y liberación del mini-turbo, buffer aéreo, boost acumulable y patada inicial.
+- [ ] **F1-061** Cancelación por freno implementada; faltan los casos de choque frontal y superficie que cancela derrape.
 
 **Verificación reciente:** el proyecto inició desde Godot MCP y `get_debug_output` devolvió `errors: []` tras añadir los recursos.
 
 **Pantalla Play:** abre `scenes/gameplay/playground.tscn`, con pista cerrada, kart controlable, cámara de seguimiento, morro naranja, alerón/luces traseras rojas y velocímetro. Acelerar: W/flecha arriba; frenar/reversa: S/flecha abajo; A gira a la izquierda y D a la derecha; hop/derrape: Espacio.
 
-Siguiente trabajo de producto: **F1-047**, conservar el impulso al despegar de rampas. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.
+Siguiente trabajo de producto: **F1-061**, completar cancelación de derrape en choques y superficies. El alcance de plataforma anterior a Fase 11 es Windows y servidor Linux/Windows.

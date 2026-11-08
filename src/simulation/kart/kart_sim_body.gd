@@ -52,11 +52,13 @@ func simulate_tick(command: InputCommandFrame, delta: float) -> void:
 	_update_longitudinal_velocity(command, delta)
 	_update_lateral_velocity(delta)
 	_apply_gravity_and_slopes(delta)
-	velocity = (
+	var ground_velocity: Vector3 = (
 		state.forward_dir * state.forward_speed
 		+ state.right_dir * state.lateral_speed
-		+ Vector3.UP * state.vertical_speed
 	)
+	if state.is_grounded and state.drift_state != 1:
+		ground_velocity = ground_velocity.slide(state.ground_normal)
+	velocity = ground_velocity + Vector3.UP * state.vertical_speed
 	_move_and_resolve_collisions()
 
 
@@ -95,42 +97,68 @@ func _update_status_and_boost_timers() -> void:
 
 func _update_hop_and_drift_state(command: InputCommandFrame) -> void:
 	var drift_pressed: bool = command.is_button_pressed(InputCommandFrame.BIT_DRIFT_HOP)
+	var minimum_drift_speed: float = stats.max_speed_forward * stats.min_drift_entry_speed_ratio
+	if state.drift_state != 0 and command.brake_axis > 0 and state.forward_speed <= minimum_drift_speed:
+		_cancel_drift()
 	if state.drift_state == 0 and state.consume_drift_hop_buffer(command.tick, state.is_grounded):
 		state.drift_state = 1
 		state.hop_ticks_left = stats.hop_duration_ticks
 		state.vertical_speed = stats.hop_upward_velocity
 	if state.drift_state == 1:
+		var steer: float = command.get_steer_float()
+		if state.drift_dir == 0 and absf(steer) > 0.2:
+			state.drift_dir = int(signf(steer))
 		state.hop_ticks_left = maxi(state.hop_ticks_left - 1, 0)
-		if state.hop_ticks_left == 0 and state.is_grounded and drift_pressed:
-			var steer: float = command.get_steer_float()
-			if absf(steer) > 0.2 and state.forward_speed >= stats.max_speed_forward * stats.min_drift_entry_speed_ratio:
+		if state.hop_ticks_left == 0 and state.is_grounded:
+			if drift_pressed and state.drift_dir != 0 and state.forward_speed >= minimum_drift_speed:
 				state.drift_state = 2
-				state.drift_dir = int(signf(steer))
+			else:
+				state.drift_state = 0
+				state.drift_dir = 0
 	if state.drift_state == 2:
-		var steer_strength: float = absf(command.get_steer_float())
-		state.mt_charge += stats.mt_charge_base_per_tick * lerpf(1.0, stats.mt_charge_tight_steer_multiplier, steer_strength)
+		if state.is_grounded:
+			var inward_steer: float = maxf(command.get_steer_float() * float(state.drift_dir), 0.0)
+			state.mt_charge += stats.mt_charge_base_per_tick * lerpf(1.0, stats.mt_charge_tight_steer_multiplier, inward_steer)
+			_update_mini_turbo_level()
 		if not drift_pressed:
 			_release_drift()
 
 
-func _release_drift() -> void:
+func _update_mini_turbo_level() -> void:
 	if state.mt_charge >= stats.mt_level_3_threshold:
 		state.mt_level = 3
-		state.boost_ticks_left = stats.mt_3_duration_ticks
-		state.boost_speed_bonus = stats.mt_3_speed_bonus
 	elif state.mt_charge >= stats.mt_level_2_threshold:
 		state.mt_level = 2
-		state.boost_ticks_left = stats.mt_2_duration_ticks
-		state.boost_speed_bonus = stats.mt_2_speed_bonus
 	elif state.mt_charge >= stats.mt_level_1_threshold:
 		state.mt_level = 1
-		state.boost_ticks_left = stats.mt_1_duration_ticks
-		state.boost_speed_bonus = stats.mt_1_speed_bonus
-	else:
-		state.mt_level = 0
+
+
+func _release_drift() -> void:
+	match state.mt_level:
+		1:
+			apply_boost(stats.mt_1_duration_ticks, stats.mt_1_speed_bonus)
+		2:
+			apply_boost(stats.mt_2_duration_ticks, stats.mt_2_speed_bonus)
+		3:
+			apply_boost(stats.mt_3_duration_ticks, stats.mt_3_speed_bonus)
+	state.mt_level = 0
 	state.mt_charge = 0.0
 	state.drift_state = 0
 	state.drift_dir = 0
+
+
+func _cancel_drift() -> void:
+	state.mt_level = 0
+	state.mt_charge = 0.0
+	state.drift_state = 0
+	state.drift_dir = 0
+	state.hop_ticks_left = 0
+
+
+func apply_boost(duration_ticks: int, speed_bonus: float) -> void:
+	state.boost_ticks_left = maxi(state.boost_ticks_left, duration_ticks)
+	state.boost_speed_bonus = maxf(state.boost_speed_bonus, speed_bonus)
+	state.forward_speed = maxf(state.forward_speed, stats.max_speed_forward + speed_bonus * 0.8)
 
 
 func _update_steering_and_heading(command: InputCommandFrame, delta: float) -> void:
@@ -144,7 +172,14 @@ func _update_steering_and_heading(command: InputCommandFrame, delta: float) -> v
 	if not state.is_grounded:
 		speed_turn_factor *= stats.air_steer_factor
 	var reverse_factor: float = -1.0 if state.forward_speed < -0.2 else 1.0
-	state.heading_yaw -= deg_to_rad(stats.max_steer_angle_deg) * state.smoothed_steer_input * speed_turn_factor * reverse_factor * delta
+	var steer_angle_deg: float = stats.max_steer_angle_deg * state.smoothed_steer_input
+	if state.drift_state == 2:
+		var steer_direction: float = signf(state.smoothed_steer_input)
+		if steer_direction == float(state.drift_dir):
+			steer_angle_deg += float(state.drift_dir) * stats.drift_inward_steer_bonus_deg * absf(state.smoothed_steer_input)
+		elif steer_direction != 0.0:
+			steer_angle_deg -= float(state.drift_dir) * stats.drift_outward_countersteer_deg * absf(state.smoothed_steer_input)
+	state.heading_yaw -= deg_to_rad(steer_angle_deg) * speed_turn_factor * reverse_factor * delta
 	rotation.y = state.heading_yaw
 	state.forward_dir = Vector3.FORWARD.rotated(Vector3.UP, state.heading_yaw).normalized()
 	state.right_dir = Vector3.RIGHT.rotated(Vector3.UP, state.heading_yaw).normalized()
@@ -160,6 +195,8 @@ func _update_longitudinal_velocity(command: InputCommandFrame, delta: float) -> 
 		var speed_ratio: float = clampf(state.forward_speed / effective_max_speed, 0.0, 1.0)
 		var acceleration: float = stats.base_acceleration * stats.acceleration_curve.sample_baked(speed_ratio) * surface_acceleration_mult
 		state.forward_speed = minf(state.forward_speed + acceleration * throttle * delta, effective_max_speed)
+		if state.drift_state == 2:
+			state.forward_speed = maxf(state.forward_speed, stats.max_speed_forward * stats.drift_speed_floor_ratio)
 	elif brake > 0.0 and state.forward_speed > 0.2:
 		state.forward_speed = move_toward(state.forward_speed, 0.0, stats.braking_deceleration * brake * delta)
 	elif brake > 0.0:
