@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="KartStatsResource" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/simulation/kart/kart_stats_resource.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+stats_id = &"heavyweight"
+archetype_name = "Heavyweight"
+max_speed_forward = 35.0
+base_acceleration = 15.0
+max_steer_angle_deg = 66.0
+weight_mass = 130.0
+mt_charge_base_per_tick = 0.85
+mt_level_1_threshold = 66.0
+mt_level_2_threshold = 154.0
+mt_level_3_threshold = 264.0

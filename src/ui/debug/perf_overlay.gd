@@ -7,7 +7,9 @@ const ANDROID_DRAW_CALL_BUDGET: int = 250
 
 func _ready() -> void:
 	visible = false
-	PerfMonitor.metrics_updated.connect(_on_metrics_updated)
+	var connection_error: int = PerfMonitor.metrics_updated.connect(_on_metrics_updated)
+	if connection_error != OK:
+		push_error("Failed to connect the performance overlay to PerfMonitor.")
 
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("toggle_perf_overlay"):

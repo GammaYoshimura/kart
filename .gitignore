@@ -2,6 +2,7 @@
 builds/
 export/
 .import/
+android/
 .env
 .env.*
 !.env.example
